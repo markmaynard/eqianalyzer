@@ -1,6 +1,8 @@
 import { Assesment } from './assesment.entity';
 import { ClergyStatus } from './clergystatus.enum';
 import { TheDb } from '../model/thedb'
+import { Observable, EMPTY, forkJoin, Observer} from'rxjs'
+import { map, flatMap, catchError } from 'rxjs/operators';
 
 export class Person {
 
@@ -27,21 +29,23 @@ export class Person {
         'district'
     ]
 
-    public static get(id: number): Promise<Person> {
+    public static get(id: number): Observable<Person> {
         const sql = 'SELECT * FROM person WHERE id = $id';
         const values = { $id: id };
 
         return TheDb.selectOne(sql, values)
-            .then((row: any) => {
-                if (row) {
-                    return new Person().fromRow(row);
-                } else {
-                    throw new Error('Expected to find 1 Person. Found 0.');
-                }
-            });
+            .pipe(
+                map((row: any) => {
+                    if (row) {
+                        return new Person().fromRow(row);
+                    } else {
+                        throw new Error('Expected to find 1 Person. Found 0.');
+                    }
+                })
+            );
     }
 
-    public static getByFirstNameLastNameAndDOB(firstName: string, lastName: string, dob: Date): Promise<Person> {
+    public static getByFirstNameLastNameAndDOB(firstName: string, lastName: string, dob: Date): Observable<Person> {
         const sql = 'SELECT * FROM person WHERE firstName = $firstName AND lastName = $lastName AND dateOfBirth = $dateOfBirth';
         const values = { 
             $firstName: firstName,
@@ -50,31 +54,35 @@ export class Person {
         };
 
         return TheDb.selectOne(sql, values)
-            .then((row) => {
-                if (row) {
-                    return new Person().fromRow(row);
-                } else {
-                    throw new Error('Expected to find 1 Person. Found 0.');
-                }
-            });
+            .pipe(
+                map((row) => {
+                    if (row) {
+                        return new Person().fromRow(row);
+                    } else {
+                        throw new Error('Expected to find 1 Person. Found 0.');
+                    }
+                })
+            );
     }
 
-    public static getAll(): Promise<Person[]> {
+    public static getAll(): Observable<Person[]> {
         const sql = `SELECT * FROM person ORDER BY lastName, firstName`;
         const values = {};
 
         return TheDb.selectAll(sql, values)
-            .then((rows) => {
-                const persones: Person[] = [];
-                for (const row of rows) {
-                    const person = new Person().fromRow(row);
-                    persones.push(person);
-                }
-                return persones;
-            });
+            .pipe(
+                map((rows) => {
+                    const persones: Person[] = [];
+                    for (const row of rows) {
+                        const person = new Person().fromRow(row);
+                        persones.push(person);
+                    }
+                    return persones;
+                })
+            );
     }
 
-    public insert(): Promise<void> {
+    public insert(): Observable<void> {
         const sql = `
             INSERT INTO person (firstName, lastName, dateOfBirth, clergyStatus, district)
             VALUES($firstName, $lastName, $dateOfBirth, $clergyStatus, $district)`;
@@ -88,16 +96,18 @@ export class Person {
         };
 
         return TheDb.insert(sql, values)
-            .then((result) => {
-                if (result.changes !== 1) {
-                    throw new Error(`Expected 1 Person to be inserted. Was ${result.changes}`);
-                } else {
-                    this.id = result.lastID;
-                }
-            });
+            .pipe(
+                map((result) => {
+                    if (result.changes !== 1) {
+                        throw new Error(`Expected 1 Person to be inserted. Was ${result.changes}`);
+                    } else {
+                        this.id = result.lastID;
+                    }
+                })
+            );
     }
 
-    public update(): Promise<void> {
+    public update(): Observable<void> {
         const sql = `
             UPDATE person
             SET firstName = $firstName
@@ -117,14 +127,16 @@ export class Person {
         };
 
         return TheDb.update(sql, values)
-            .then((result) => {
-                if (result.changes !== 1) {
-                    throw new Error(`Expected 1 Person to be updated. Was ${result.changes}`);
-                }
-            });
+            .pipe(
+                map((result) => {
+                    if (result.changes !== 1) {
+                        throw new Error(`Expected 1 Person to be updated. Was ${result.changes}`);
+                    }
+                })
+            );
     }
 
-    public delete(): Promise<void> {
+    public delete(): Observable<void> {
         const sql = `
             DELETE FROM person WHERE id = $id`;
 
@@ -133,11 +145,13 @@ export class Person {
         };
 
         return TheDb.delete(sql, values)
-            .then((result) => {
-                if (result.changes !== 1) {
-                    throw new Error(`Expected 1 Person to be deleted. Was ${result.changes}`);
-                }
-            });
+            .pipe(
+                map((result) => {
+                    if (result.changes !== 1) {
+                        throw new Error(`Expected 1 Person to be deleted. Was ${result.changes}`);
+                    }
+                })
+            );
     }
 
     public fromRow(row: object): Person {
@@ -156,7 +170,7 @@ export class Person {
         this.dateOfBirth =new Date(row['dateOfBirth']);
         this.clergyStatus = ClergyStatus[<string>row['clergyStatus']];
         this.district = row['district'];
-        Person.getByFirstNameLastNameAndDOB(row['firstName'], row['lastName'], new Date(row['dateOfBirth'])).then( person => person).catch(err => {
+        Person.getByFirstNameLastNameAndDOB(row['firstName'], row['lastName'], new Date(row['dateOfBirth'])).pipe( person => person).catch(err => {
             
         })
         return this;

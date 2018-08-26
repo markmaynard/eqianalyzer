@@ -16,6 +16,10 @@ import '../assets/sass/style.scss';
 import { parse } from 'papaparse';
 import { readFileSync } from 'fs';
 
+
+import { Observable, EMPTY, forkJoin, Observer} from'rxjs'
+import { map, flatMap, catchError } from 'rxjs/operators';
+
 @Component({
     selector: 'app',
     templateUrl: 'app.component.html',
@@ -44,19 +48,21 @@ export class AppComponent implements OnInit{
 
     public openDb(filename: string) {
         TheDb.openDb(filename)
-            .then(() => {
-                if (!Settings.hasFixedDbLocation) {
-                    Settings.dbPath = filename;
-                    Settings.write();
+            .pipe(
+                map(() => {
+                    if (!Settings.hasFixedDbLocation) {
+                        Settings.dbPath = filename;
+                        Settings.write();
+                    }
+                }),
+                map(() => this.getPeople())
+            ).subscribe(
+                () => {},
+                (reason) => {
+                    // Handle errors
+                    console.log('Error occurred while opening database: ', reason);
                 }
-            })
-            .then(() => {
-                this.getPeople();
-            })
-            .catch((reason) => {
-                // Handle errors
-                console.log('Error occurred while opening database: ', reason);
-            });
+            );
     }
 
     public createDb(filename?: string) {
@@ -79,18 +85,22 @@ export class AppComponent implements OnInit{
         }
 
         TheDb.createDb(filename)
-            .then((dbPath) => {
-                if (!Settings.hasFixedDbLocation) {
-                    Settings.dbPath = dbPath;
-                    Settings.write();
+            .pipe(
+                map((dbPath) => {
+                    if (!Settings.hasFixedDbLocation) {
+                        Settings.dbPath = dbPath;
+                        Settings.write();
+                    }
+                }),
+                map(() => {
+                    this.getPeople();
+                })
+            ).subscribe(
+                () => {},
+                (reason) => {
+                    console.log(reason);
                 }
-            })
-            .then(() => {
-                this.getPeople();
-            })
-            .catch((reason) => {
-                console.log(reason);
-            });
+            );
     }
 
     public onRestoreDb() {
@@ -103,7 +113,7 @@ export class AppComponent implements OnInit{
 
     public getPeople() {
         Person.getAll()
-            .then((people) => {
+            .subscribe((people) => {
                 this.people = people;
             });
     }

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {createConnection, Connection} from 'typeorm';
+// import {createConnection, Connection} from 'typeorm';
 import { from, Observable } from 'rxjs';
 
 @Injectable({
@@ -10,7 +10,7 @@ export class DbService {
   dbLoaded = true;
 
   constructor() { }
-
+/*
   //tslint:disable-next-line
   loadDB(path: string): Observable<Connection> {
     return from(
@@ -27,7 +27,7 @@ export class DbService {
         }
       )
     )
-  }
+  }*/
 
 }
 /*

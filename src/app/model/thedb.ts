@@ -1,5 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { Observable, EMPTY, forkJoin, Observer} from'rxjs';
+import { map, flatMap, catchError } from 'rxjs/operators';
 
 import { Database } from 'sqlite3';
 import { Settings } from './settings';
@@ -10,7 +12,7 @@ export interface IDbResult {
 }
 
 /**
- * TheDb is a Promise-ified wrapper around bare sqlite3 API.
+ * TheDb is RxJs wrapper around sqlite3 API.
  *
  * @export
  * @class TheDb
@@ -19,177 +21,187 @@ export class TheDb {
     private static readonly version = 1;
     private static db: Database;
 
-    public static selectOne(sql: string, values: {}): Promise<{}> {
-        return new Promise<{}>((resolve, reject) => {
+    public static selectOne(sql: string, values: {}): Observable<{}> {
+        return Observable.create((observer: Observer<{}>) => {
             TheDb.db.get(sql, values, (err, row) => {
                 if (err) {
-                    reject(err);
+                    observer.error(err);
                 } else {
-                    resolve(row);
+                    observer.next(row);
+                    observer.complete();
                 }
             });
         });
     }
 
-    public static selectAll(sql: string, values: {}): Promise<Array<{}>> {
-        return new Promise<Array<{}>>((resolve, reject) => {
+    public static selectAll(sql: string, values: {}): Observable<Array<{}>> {
+        return Observable.create((observer: Observer<Array<{}>>) => {
             TheDb.db.all(sql, values, (err, rows) => {
                 if (err) {
-                    reject(err);
+                    observer.error(err);
                 } else {
-                    resolve(rows);
+                    observer.next(rows);
+                    observer.complete();
                 }
             });
         });
     }
 
-    public static insert(sql: string, values: {}): Promise<IDbResult> {
+    public static insert(sql: string, values: {}): Observable<IDbResult> {
         return TheDb.change(sql, values);
     }
 
-    public static update(sql: string, values: {}): Promise<IDbResult> {
+    public static update(sql: string, values: {}): Observable<IDbResult> {
         return TheDb.change(sql, values);
     }
 
-    public static delete(sql: string, values: {}): Promise<IDbResult> {
+    public static delete(sql: string, values: {}): Observable<IDbResult> {
         return TheDb.change(sql, values);
     }
 
-    public static query(sql: string): Promise<void> {
-        return new Promise<void>((resolve, reject) => {
+    public static query(sql: string): Observable<void> {
+        return Observable.create((observer: Observer<void>) => {
             TheDb.db.run(sql, {}, (err) => {
                 if (err) {
-                    reject(err);
+                    observer.error(err);
                 } else {
-                    resolve();
+                    observer.next(undefined);
+                    observer.complete();
                 }
             });
         });
     }
 
-    public static beginTxn(): Promise<void> {
-        return new Promise<void>((resolve, reject) => {
+    public static beginTxn(): Observable<void> {
+        return Observable.create((observer: Observer<void>) => {
             TheDb.db.run('BEGIN', (err) => {
                 if (err) {
-                    reject(err);
+                    observer.error(err);
                 } else {
-                    resolve();
+                    observer.next(undefined);
+                    observer.complete();
                 }
             });
         });
     }
 
-    public static commitTxn(): Promise<void> {
-        return new Promise<void>((resolve, reject) => {
+    public static commitTxn(): Observable<void> {
+        return Observable.create((observer: Observer<void>) => {
             TheDb.db.run('COMMIT', (err) => {
                 if (err) {
-                    reject(err);
+                    observer.error(err);
                 } else {
-                    resolve();
+                    observer.next(undefined);
+                    observer.complete();
                 }
             });
         });
     }
 
-    public static rollbackTxn(reason: Error): Promise<void> {
-        return new Promise<void>((_resolve, reject) => {
+    public static rollbackTxn(reason: Error): Observable<void> {
+        return Observable.create((observer: Observer<void>) => {
             console.log('Rollback transaction');
             TheDb.db.run('ROLLBACK', (err) => {
                 if (err) {
-                    console.log(err);
-                    reject(new Error('Unforeseen error occurred. Please restart the application'));
+                    observer.error(err);
                 } else {
-                    reject(reason);
+                    observer.next(undefined);
+                    observer.complete();
                 }
             });
         });
     }
 
-    public static importJson(filename: string, disableForeignKeys: boolean): Promise<void> {
+    public static importJson(filename: string, disableForeignKeys: boolean): Observable<void> {
         const data: { version: number, tables: { [key: string]: Array<{}> } } = JSON.parse(fs.readFileSync(filename, 'utf8'));
         const tableNames = Object.keys(data.tables);
-        const deletes: Array<Promise<IDbResult>> = [];
-        const inserts: Array<Promise<IDbResult>> = [];
+        const deletes: Array<Observable<IDbResult>> = [];
+        const inserts: Array<Observable<IDbResult>> = [];
 
         let foreignKeys: boolean;
 
         return TheDb.getPragmaForeignKeys()
-            .then((value) => {
-                foreignKeys = value;
-                if (foreignKeys === !disableForeignKeys) {
-                    return Promise.resolve();
-                } else {
-                    return TheDb.setPragmaForeignKeys(!disableForeignKeys);
-                }
-            })
-            .then(TheDb.beginTxn)
-            .then(() => {
-                for (const table of tableNames) {
-                    deletes.push(TheDb.delete(`DELETE FROM ${table}`, {}));
-                }
-                return Promise.all(deletes);
-            })
-            .then(() => {
-                for (const tableName of tableNames) {
-                    if (data.tables[tableName].length === 0) {
-                        continue;
+            .pipe(
+                flatMap((value) => {
+                    foreignKeys = value;
+                    if (foreignKeys === !disableForeignKeys) {
+                        return EMPTY;
+                    } else {
+                        return TheDb.setPragmaForeignKeys(!disableForeignKeys);
                     }
-                    const columnNames = Object.keys(data.tables[tableName][0]);
-
-                    for (const row of data.tables[tableName]) {
-                        let sql = `INSERT INTO ${tableName} (${columnNames.join(', ')}) VALUES\n`;
-                        const values: Array<number | string | null> = [];
-                        for (const name of columnNames) {
-                            values.push(row[name]);
+                }),
+                flatMap(TheDb.beginTxn),
+                flatMap(() => {
+                    for (const table of tableNames) {
+                        deletes.push(TheDb.delete(`DELETE FROM ${table}`, {}));
+                    }
+                    return forkJoin(deletes);
+                }),
+                flatMap(() => {
+                    for (const tableName of tableNames) {
+                        if (data.tables[tableName].length === 0) {
+                            continue;
                         }
-                        sql += `(${Array(columnNames.length + 1).join('?, ').slice(0, -2)})`;
-                        inserts.push(TheDb.insert(sql, values));
+                        const columnNames = Object.keys(data.tables[tableName][0]);
+
+                        for (const row of data.tables[tableName]) {
+                            let sql = `INSERT INTO ${tableName} (${columnNames.join(', ')}) VALUES\n`;
+                            const values: Array<number | string | null> = [];
+                            for (const name of columnNames) {
+                                values.push(row[name]);
+                            }
+                            sql += `(${Array(columnNames.length + 1).join('?, ').slice(0, -2)})`;
+                            inserts.push(TheDb.insert(sql, values));
+                        }
                     }
-                }
-                return Promise.all(inserts);
-            })
-            .then(TheDb.commitTxn)
-            .catch(TheDb.rollbackTxn)
-            .then(() => {
-                if (foreignKeys === !disableForeignKeys) {
-                    return Promise.resolve();
-                } else {
-                    return TheDb.setPragmaForeignKeys(foreignKeys);
-                }
-            });
+                    return forkJoin(inserts);
+                }),
+                flatMap(TheDb.commitTxn),
+                catchError(TheDb.rollbackTxn)
+            ).pipe(
+                flatMap(() => {
+                    if (foreignKeys === !disableForeignKeys) {
+                        return EMPTY;
+                    } else {
+                        return TheDb.setPragmaForeignKeys(foreignKeys);
+                    }
+                })
+            );
     }
 
-    public static exportJson(filename: string): Promise<void> {
+    public static exportJson(filename: string): Observable<void> {
         const data = {
             version: TheDb.version,
             tables: {},
         };
 
         return TheDb.selectAll(`SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name`, {})
-            .then((rows) => {
-                const selects: Array<Promise<Array<{}>>> = [];
-                for (const row of rows) {
-                    selects.push(
-                        TheDb.selectAll(`SELECT * FROM ${row['name']}`, {})
-                            .then((results) => {
-                                return data.tables[row['name']] = results;
-                            }),
-                    );
-                }
-                return Promise.all(selects);
-            })
-            .then(() => {
-                fs.writeFileSync(filename, JSON.stringify(data, undefined, 4));
-            });
+            .pipe(
+                flatMap((rows) => {
+                    const selects: Array<Observable<Array<{}>>> = [];
+                    for (const row of rows) {
+                        selects.push(
+                            TheDb.selectAll(`SELECT * FROM ${row['name']}`, {})
+                                .pipe(
+                                    map((results) => {
+                                        return data.tables[row['name']] = results;
+                                    })
+                                ),
+                        );
+                    }
+                    return forkJoin(selects);
+                }),
+                map((res: any) => fs.writeFileSync(filename, JSON.stringify(data, undefined, 4)))
+            )
     }
 
-    public static resetDbKarma(): Promise<void> {
+    public static resetDbKarma(): Observable<void> {
         const fromJson = path.join(Settings.dbFolder, `karma-database.init.json`);
 
         return TheDb.importJson(fromJson, true);
     }
 
-    public static createDb(dbPath: string): Promise<string> {
+    public static createDb(dbPath: string): Observable<string> {
         dbPath += path.extname(dbPath) === '.db' ? '' : '.db';
 
         console.log('Creating  databae: ', dbPath);
@@ -204,154 +216,167 @@ export class TheDb {
         }
 
         return TheDb.getDb(dbPath)
-            .then(() => TheDb.exec(schema))
-            .then(() => TheDb.setPragmaForeignKeys(true))
-            .then(() => TheDb.importJson(dataPath, false))
-            .then(TheDb.setPragmaVersion)
-            .then(() => {
-                console.log('Database created.');
-                return dbPath;
-            });
+            .pipe(
+                flatMap(() => TheDb.exec(schema)),
+                flatMap(() => TheDb.setPragmaForeignKeys(true)),
+                flatMap(() => TheDb.importJson(dataPath, false)),
+                flatMap(TheDb.setPragmaVersion),
+                flatMap(() => {
+                    console.log('Database created.');
+                    return dbPath;
+                })
+            )
     }
 
-    public static openDb(dbPath: string): Promise<void> {
+    public static openDb(dbPath: string): Observable<void> {
         console.log('Opening database: ', dbPath);
         return TheDb.getDb(dbPath)
-            .then(() => TheDb.setPragmaForeignKeys(true))
-            .then(TheDb.upgradeDb)
-            .then(() => {
-                console.log('Database opened');
-                return Promise.resolve();
-            });
+            .pipe(
+                flatMap(() => TheDb.setPragmaForeignKeys(true)),
+                flatMap(TheDb.upgradeDb),
+                map((res: any) => {
+                    console.log('Database opened');
+                    return;
+                })
+            );
     }
 
-    public static closeDb(): Promise<void> {
-        if (!TheDb.db) {
-            return Promise.resolve();
-        }
-        return new Promise<void>((resolve, reject) => {
-            TheDb.db.close((err) => {
+    public static closeDb(): Observable<void> {
+        return Observable.create((observer: Observer<void>) => {
+            if (!TheDb.db) {
+                return
+            }
+            return TheDb.db.close((err) => {
                 console.log('Closing current Db');
                 if (err) {
-                    reject(err);
+                    observer.error(err);
                     console.log('Db not closed');
                 } else {
-                    resolve();
+                    observer.next(undefined);
+                    observer.complete();
                 }
             });
         });
     }
 
-    private static getDb(dbPath: string): Promise<void> {
+    private static getDb(dbPath: string): Observable<void> {
         return TheDb.closeDb()
-            .then(() => {
-                return new Promise<void>((resolve, reject) => {
-                    const db = new Database(dbPath, (err) => {
-                        if (err) {
-                            reject(err);
-                        } else {
-                            TheDb.db = db;
-                            resolve();
-                        }
+            .pipe(
+                flatMap(() => {
+                    return Observable.create((observer: Observer<void>) => {
+                        const db = new Database(dbPath, (err) => {
+                            if (err) {
+                                observer.error(err);
+                            } else {
+                                TheDb.db = db;
+                                observer.next(undefined);
+                                observer.complete();
+                            }
+                        });
                     });
-                });
-            });
+                })
+            );
     }
 
-    private static upgradeDb(): Promise<void> {
+    private static upgradeDb(): Observable<void> {
         return TheDb.getPragmaVersion()
-            .then((version) => {
-                if (version === TheDb.version) {
-                    return Promise.resolve();
-                } else if (version > TheDb.version) {
-                    throw new Error(`Cannot downgrade database from version ${version} to ${TheDb.version}.`);
-                } else {
-                    return new Promise<void>((resolve, reject) => {
+            .pipe(
+                map((version) => {
+                    if (version === TheDb.version) {
+                        return undefined;
+                    } else if (version > TheDb.version) {
+                        throw new Error(`Cannot downgrade database from version ${version} to ${TheDb.version}.`);
+                    } else {
                         switch (version) {
                             case 0:
                                 // Upgrade schema if needed
                                 // Upgrade data if needed
                                 break;
                             default:
-                                reject(new Error(`No upgrade defined for database version ${version}`));
+                                new Error(`No upgrade defined for database version ${version}`);
                         }
-                        resolve();
-                    });
-                }
-            })
-            .then(TheDb.setPragmaVersion);
-
+                        return undefined
+                    }
+                }),
+                flatMap(TheDb.setPragmaVersion)
+            )
     }
 
-    private static change(sql: string, values: {}): Promise<IDbResult> {
-        return new Promise<IDbResult>((resolve, reject) => {
+    private static change(sql: string, values: {}): Observable<IDbResult> {
+        return Observable.create((observer: Observer<IDbResult>) => {
             TheDb.db.run(sql, values, function (err) {
                 if (err) {
-                    reject(err);
+                    observer.error(err);
                 } else {
-                    resolve({ changes: this.changes, lastID: this.lastID });
+                    observer.next({ changes: this.changes, lastID: this.lastID });
+                    observer.complete();
                 }
             });
         });
     }
 
-    private static exec(sql: string): Promise<void> {
-        return new Promise<void>((resolve, reject) => {
+    private static exec(sql: string): Observable<void> {
+        return Observable.create((observer: Observer<void>) => {
             TheDb.db.exec(sql, (err) => {
                 if (err) {
-                    reject(err);
+                    observer.error(err);
                 } else {
-                    resolve();
+                    observer.next(undefined);
+                    observer.complete();
                 }
             });
         });
     }
 
-    private static getPragmaForeignKeys(): Promise<boolean> {
-        return new Promise<boolean>((resolve, reject) => {
+    private static getPragmaForeignKeys(): Observable<boolean> {
+        return Observable.create((observer: Observer<boolean>) => {
             TheDb.db.get('PRAGMA foreign_keys', (err, row) => {
                 if (err) {
-                    reject(err);
+                    observer.error(err);
                 } else {
-                    resolve(Boolean(row['foreign_keys']));
+                    observer.next(Boolean(row['foreign_keys']));
+                    observer.complete();
                 }
             });
         });
     }
 
-    private static setPragmaForeignKeys(value: boolean): Promise<void> {
-        return new Promise<void>((resolve, reject) => {
+    private static setPragmaForeignKeys(value: boolean): Observable<void> {
+        return Observable.create((observer: Observer<void>) => {
             TheDb.db.run(`PRAGMA foreign_keys = ${value}`, (err) => {
                 if (err) {
-                    reject(err);
+                    observer.error(err);
                 } else {
                     console.log(`PRAGMA foreign_keys = ${value}`);
-                    resolve();
+                    observer.next(undefined);
+                    observer.complete();
                 }
             });
         });
     }
 
-    private static getPragmaVersion(): Promise<number> {
-        return new Promise<number>((resolve, reject) => {
+    private static getPragmaVersion(): Observable<number> {
+        return Observable.create((observer: Observer<number>) => {
             TheDb.db.get('PRAGMA user_version', (err, row) => {
                 if (err) {
-                    reject(err);
+                    observer.error(err);
                 } else {
-                    resolve(Number(row['user_version']));
+                    observer.next(Number(row['user_version']));
+                    observer.complete();
                 }
             });
         });
     }
 
-    private static setPragmaVersion(): Promise<void> {
-        return new Promise<void>((resolve, reject) => {
+    private static setPragmaVersion(): Observable<void> {
+        return Observable.create((observer: Observer<void>) => {
             TheDb.db.run(`PRAGMA user_version = ${TheDb.version}`, (err) => {
                 if (err) {
-                    reject(err);
+                    observer.error(err);
                 } else {
                     console.log(`PRAGMA version = ${TheDb.version}`);
-                    resolve();
+                    observer.next(undefined);
+                    observer.complete();
                 }
             });
         });

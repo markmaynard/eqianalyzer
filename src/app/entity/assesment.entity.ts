@@ -1,6 +1,7 @@
 import { Person } from './person.entity';
 import { TheDb } from '../model/thedb';
-
+import { Observable, EMPTY, forkJoin, Observer} from'rxjs'
+import { map, flatMap, catchError } from 'rxjs/operators';
 
 export class Assesment {
 
@@ -33,36 +34,41 @@ export class Assesment {
     stressTolerance: Number;
     optimismWellBeingIndicator: Number;
 
-    public static get(id: number): Promise<Assesment> {
+    public static get(id: number): Observable<Assesment> {
         const sql = 'SELECT * FROM assesment WHERE id = $id';
         const values = { $id: id };
 
         return TheDb.selectOne(sql, values)
-            .then((row: any) => {
-                if (row) {
-                    return new Assesment().fromRow(row);
-                } else {
-                    throw new Error('Expected to find 1 Assesment. Found 0.');
+            .pipe(
+                map((row: any) => {
+                    if (row) {
+                        return new Assesment().fromRow(row);
+                    } else {
+                        throw new Error('Expected to find 1 Assesment. Found 0.');
+                    }
                 }
-            });
+            )
+        );
     }
 
-    public static getAllByPerson(person: Person): Promise<Assesment[]> {
+    public static getAllByPerson(person: Person): Observable<Assesment[]> {
         const sql = 'SELECT * FROM assesment WHERE personId = $id';
         const values = { $id: person.id };
 
         return TheDb.selectAll(sql, values)
-            .then((rows) => {
-                const assesmentes: Assesment[] = [];
-                for (const row of rows) {
-                    const assesment = new Assesment().fromRow(row);
-                    assesmentes.push(assesment);
-                }
-                return assesmentes;
-            });
+            .pipe(
+                map((rows: any[]) => {
+                    const assesmentes: Assesment[] = [];
+                    for (const row of rows) {
+                        const assesment = new Assesment().fromRow(row);
+                        assesmentes.push(assesment);
+                    }
+                    return assesmentes;
+                })
+            );
     }
 
-    public static getAllInRange(d1: Date, d2: Date): Promise<Assesment[]> {
+    public static getAllInRange(d1: Date, d2: Date): Observable<Assesment[]> {
         const sql = 'SELECT * FROM assesment WHERE date BETWEEN $d1 AND $d2 ORDER BY date';
         const values = { 
             $d1: d1,
@@ -70,17 +76,19 @@ export class Assesment {
         };
 
         return TheDb.selectAll(sql, values)
-            .then((rows) => {
+            .pipe(
+                map((rows) => {
                 const assesmentes: Assesment[] = [];
                 for (const row of rows) {
                     const assesment = new Assesment().fromRow(row);
                     assesmentes.push(assesment);
                 }
                 return assesmentes;
-            });
+                })
+            );
     }
 
-    public static getAllInRangeForPerson(d1: Date, d2: Date, person: Person): Promise<Assesment[]> {
+    public static getAllInRangeForPerson(d1: Date, d2: Date, person: Person): Observable<Assesment[]> {
         const sql = 'SELECT * FROM assesment WHERE date BETWEEN $d1 AND $d2 AND personId = $person';
         const values = { 
             $d1: d1,
@@ -89,32 +97,36 @@ export class Assesment {
         };
 
         return TheDb.selectAll(sql, values)
-            .then((rows) => {
-                const assesmentes: Assesment[] = [];
-                for (const row of rows) {
-                    const assesment = new Assesment().fromRow(row);
-                    assesmentes.push(assesment);
-                }
-                return assesmentes;
-            });
+            .pipe(
+                map((rows) => {
+                    const assesmentes: Assesment[] = [];
+                    for (const row of rows) {
+                        const assesment = new Assesment().fromRow(row);
+                        assesmentes.push(assesment);
+                    }
+                    return assesmentes;
+                })
+            );
     }
 
-    public static getAll(): Promise<Assesment[]> {
+    public static getAll(): Observable<Assesment[]> {
         const sql = `SELECT * FROM assesment ORDER BY date`;
         const values = {};
 
         return TheDb.selectAll(sql, values)
-            .then((rows) => {
+            .pipe(
+                map((rows) => {
                 const assesmentes: Assesment[] = [];
                 for (const row of rows) {
                     const assesment = new Assesment().fromRow(row);
                     assesmentes.push(assesment);
                 }
                 return assesmentes;
-            });
+                })
+            );
     }
 
-    public insert(): Promise<void> {
+    public insert(): Observable<void> {
         const sql = `
             INSERT INTO assesment (
                 date,
@@ -205,16 +217,18 @@ export class Assesment {
         };
 
         return TheDb.insert(sql, values)
-            .then((result) => {
-                if (result.changes !== 1) {
-                    throw new Error(`Expected 1 Assesment to be inserted. Was ${result.changes}`);
-                } else {
-                    this.id = result.lastID;
-                }
-            });
+            .pipe(
+                map((result) => {
+                    if (result.changes !== 1) {
+                        throw new Error(`Expected 1 Assesment to be inserted. Was ${result.changes}`);
+                    } else {
+                        this.id = result.lastID;
+                    }
+                })
+            );
     }
 
-    public update(): Promise<void> {
+    public update(): Observable<void> {
         const sql = `
             UPDATE assesment
                 SET date = $date
@@ -305,14 +319,16 @@ export class Assesment {
         };
 
         return TheDb.update(sql, values)
-            .then((result) => {
-                if (result.changes !== 1) {
-                    throw new Error(`Expected 1 Assesment to be updated. Was ${result.changes}`);
-                }
-            });
+            .pipe(
+                    map((result: any) => {
+                    if (result.changes !== 1) {
+                        throw new Error(`Expected 1 Assesment to be updated. Was ${result.changes}`);
+                    }
+                })
+            );
     }
 
-    public delete(): Promise<void> {
+    public delete(): Observable<void> {
         const sql = `
             DELETE FROM assesment WHERE id = $id`;
 
@@ -321,11 +337,13 @@ export class Assesment {
         };
 
         return TheDb.delete(sql, values)
-            .then((result) => {
-                if (result.changes !== 1) {
-                    throw new Error(`Expected 1 Assesment to be deleted. Was ${result.changes}`);
-                }
-            });
+            .pipe(
+                    map((result) => {
+                    if (result.changes !== 1) {
+                        throw new Error(`Expected 1 Assesment to be deleted. Was ${result.changes}`);
+                    }
+                })
+        );
     }
 
     public fromRow(row: object): Assesment {
