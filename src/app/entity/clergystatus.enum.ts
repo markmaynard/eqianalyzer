@@ -1,4 +1,4 @@
-enum CleargyStatus {
+export enum ClergyStatus {
     Full_Elder = 'Full Elder',
     Full_Deacon = 'Full Deacon',
     Provisional_Elder = 'Provisional Elder',

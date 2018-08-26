@@ -1,88 +1,362 @@
-import {Entity, PrimaryGeneratedColumn, Column, PrimaryColumn, JoinColumn, ManyToOne} from 'typeorm';
 import { Person } from './person.entity';
+import { TheDb } from '../model/thedb';
 
-@Entity()
+
 export class Assesment {
 
-    @PrimaryGeneratedColumn()
     id: number;
-
-    @ManyToOne(type => Person, person => person.assesments)
-    person: Person;
-
-    @Column('double')
+    date: Date;
+    personId: Number;
     inconsistencyIndex: Number;
-
-    @Column('double')
     positiveImpression: Number;
-
-    @Column('double')
     negativeImpression: Number;
-
-    @Column('double')
     item133Response: Number;
-
-    @Column('double')
     totalEmotionalIntelligence: Number;
-
-    @Column('double')
     selfPerceptionComposite: Number;
-
-    @Column('double')
     selfRegard: Number;
-
-    @Column('double')
     selfActualization: Number;
-
-    @Column('double')
     emotionalSelfAwareness: Number;
-
-    @Column('double')
     selfExpressionComposite: Number;
-
-    @Column('double')
     emotionalExpression: Number;
-
-    @Column('double')
     assertiveness: Number;
-
-    @Column('double')
     independence: Number;
-
-    @Column('double')
     interpersonalComposite: Number;
-
-    @Column('double')
     interpersonalRelationships: Number;
-
-    @Column('double')
     empathy: Number;
-
-    @Column('double')
     socialResponsibility: Number;
-
-    @Column('double')
     decisionMakingComposite: Number;
-
-    @Column('double')
     problemSolving: Number;
-
-    @Column('double')
     realityTesting: Number;
-
-    @Column('double')
     impulseControl: Number;
-
-    @Column('double')
     stressManagementComposite: Number;
-
-    @Column('double')
     flexibility: Number;
-
-    @Column('double')
     stressTolerance: Number;
-
-    @Column('double')
     optimismWellBeingIndicator: Number;
+
+    public static get(id: number): Promise<Assesment> {
+        const sql = 'SELECT * FROM assesment WHERE id = $id';
+        const values = { $id: id };
+
+        return TheDb.selectOne(sql, values)
+            .then((row: any) => {
+                if (row) {
+                    return new Assesment().fromRow(row);
+                } else {
+                    throw new Error('Expected to find 1 Assesment. Found 0.');
+                }
+            });
+    }
+
+    public static getAllByPerson(person: Person): Promise<Assesment[]> {
+        const sql = 'SELECT * FROM assesment WHERE personId = $id';
+        const values = { $id: person.id };
+
+        return TheDb.selectAll(sql, values)
+            .then((rows) => {
+                const assesmentes: Assesment[] = [];
+                for (const row of rows) {
+                    const assesment = new Assesment().fromRow(row);
+                    assesmentes.push(assesment);
+                }
+                return assesmentes;
+            });
+    }
+
+    public static getAllInRange(d1: Date, d2: Date): Promise<Assesment[]> {
+        const sql = 'SELECT * FROM assesment WHERE date BETWEEN $d1 AND $d2 ORDER BY date';
+        const values = { 
+            $d1: d1,
+            $d2: d2
+        };
+
+        return TheDb.selectAll(sql, values)
+            .then((rows) => {
+                const assesmentes: Assesment[] = [];
+                for (const row of rows) {
+                    const assesment = new Assesment().fromRow(row);
+                    assesmentes.push(assesment);
+                }
+                return assesmentes;
+            });
+    }
+
+    public static getAllInRangeForPerson(d1: Date, d2: Date, person: Person): Promise<Assesment[]> {
+        const sql = 'SELECT * FROM assesment WHERE date BETWEEN $d1 AND $d2 AND personId = $person';
+        const values = { 
+            $d1: d1,
+            $d2: d2,
+            $person: person.id
+        };
+
+        return TheDb.selectAll(sql, values)
+            .then((rows) => {
+                const assesmentes: Assesment[] = [];
+                for (const row of rows) {
+                    const assesment = new Assesment().fromRow(row);
+                    assesmentes.push(assesment);
+                }
+                return assesmentes;
+            });
+    }
+
+    public static getAll(): Promise<Assesment[]> {
+        const sql = `SELECT * FROM assesment ORDER BY date`;
+        const values = {};
+
+        return TheDb.selectAll(sql, values)
+            .then((rows) => {
+                const assesmentes: Assesment[] = [];
+                for (const row of rows) {
+                    const assesment = new Assesment().fromRow(row);
+                    assesmentes.push(assesment);
+                }
+                return assesmentes;
+            });
+    }
+
+    public insert(): Promise<void> {
+        const sql = `
+            INSERT INTO assesment (
+                date,
+                personId,
+                inconsistencyIndex,
+                positiveImpression,
+                negativeImpression,
+                item133Response,
+                totalEmotionalIntelligence,
+                selfPerceptionComposite,
+                selfRegard,
+                selfActualization,
+                emotionalSelfAwareness,
+                selfExpressionComposite,
+                emotionalExpression,
+                assertiveness,
+                independence,
+                interpersonalComposite,
+                interpersonalRelationships,
+                empathy,
+                socialResponsibility,
+                decisionMakingComposite,
+                problemSolving,
+                realityTesting,
+                impulseControl,
+                stressManagementComposite,
+                flexibility,
+                stressTolerance,
+                optimismWellBeingIndicator)
+            VALUES(
+                $date,
+                $personId,
+                $inconsistencyIndex,
+                $positiveImpression,
+                $negativeImpression,
+                $item133Response,
+                $totalEmotionalIntelligence,
+                $selfPerceptionComposite,
+                $selfRegard,
+                $selfActualization,
+                $emotionalSelfAwareness,
+                $selfExpressionComposite,
+                $emotionalExpression,
+                $assertiveness,
+                $independence,
+                $interpersonalComposite,
+                $interpersonalRelationships,
+                $empathy,
+                $socialResponsibility,
+                $decisionMakingComposite,
+                $problemSolving,
+                $realityTesting,
+                $impulseControl,
+                $stressManagementComposite,
+                $flexibility,
+                $stressTolerance,
+                $optimismWellBeingIndicator
+            )`;
+
+        const values = {
+            $date: this.date,
+            $personId: this.personId,
+            $inconsistencyIndex: this.inconsistencyIndex,
+            $positiveImpression: this.positiveImpression,
+            $negativeImpression: this.negativeImpression,
+            $item133Response: this.item133Response,
+            $totalEmotionalIntelligence: this.totalEmotionalIntelligence,
+            $selfPerceptionComposite: this.selfPerceptionComposite,
+            $selfRegard: this.selfRegard,
+            $selfActualization: this.selfActualization,
+            $emotionalSelfAwareness: this.emotionalSelfAwareness,
+            $selfExpressionComposite: this.selfExpressionComposite,
+            $emotionalExpression: this.emotionalExpression,
+            $assertiveness: this.assertiveness,
+            $independence: this.independence,
+            $interpersonalComposite: this.interpersonalComposite,
+            $interpersonalRelationships: this.interpersonalRelationships,
+            $empathy: this.empathy,
+            $socialResponsibility: this.socialResponsibility,
+            $decisionMakingComposite: this.decisionMakingComposite,
+            $problemSolving: this.problemSolving,
+            $realityTesting: this.realityTesting,
+            $impulseControl: this.impulseControl,
+            $stressManagementComposite: this.stressManagementComposite,
+            $flexibility: this.flexibility,
+            $stressTolerance: this.stressTolerance,
+            $optimismWellBeingIndicator: this.optimismWellBeingIndicator
+        };
+
+        return TheDb.insert(sql, values)
+            .then((result) => {
+                if (result.changes !== 1) {
+                    throw new Error(`Expected 1 Assesment to be inserted. Was ${result.changes}`);
+                } else {
+                    this.id = result.lastID;
+                }
+            });
+    }
+
+    public update(): Promise<void> {
+        const sql = `
+            UPDATE assesment
+                SET date = $date
+                SET personId = $personId
+                SET inconsistencyIndex = $inconsistencyIndex
+                SET positiveImpression = $positiveImpression
+                SET negativeImpression = $negativeImpression
+                SET item133Response = $item133Response
+                SET totalEmotionalIntelligence = $totalEmotionalIntelligence
+                SET selfPerceptionComposite = $selfPerceptionComposite
+                SET selfRegard = $selfRegard
+                SET selfActualization = $selfActualization
+                SET emotionalSelfAwareness = $emotionalSelfAwareness
+                SET selfExpressionComposite = $selfExpressionComposite
+                SET emotionalExpression = $emotionalExpression
+                SET assertiveness = $assertiveness
+                SET independence = $independence
+                SET interpersonalComposite = $interpersonalComposite
+                SET interpersonalRelationships = $interpersonalRelationships
+                SET empathy = $empathy
+                SET socialResponsibility = $socialResponsibility
+                SET decisionMakingComposite = $decisionMakingComposite
+                SET problemSolving = $problemSolving
+                SET realityTesting = $realityTesting
+                SET impulseControl = $impulseControl
+                SET stressManagementComposite = $stressManagementComposite
+                SET flexibility = $flexibility
+                SET stressTolerance = $stressTolerance
+                SET optimismWellBeingIndicator = $optimismWellBeingIndicator)
+            VALUES(
+                $date,
+                $personId,
+                $inconsistencyIndex,
+                $positiveImpression,
+                $negativeImpression,
+                $item133Response,
+                $totalEmotionalIntelligence,
+                $selfPerceptionComposite,
+                $selfRegard,
+                $selfActualization,
+                $emotionalSelfAwareness,
+                $selfExpressionComposite,
+                $emotionalExpression,
+                $assertiveness,
+                $independence,
+                $interpersonalComposite,
+                $interpersonalRelationships,
+                $empathy,
+                $socialResponsibility,
+                $decisionMakingComposite,
+                $problemSolving,
+                $realityTesting,
+                $impulseControl,
+                $stressManagementComposite,
+                $flexibility,
+                $stressTolerance,
+                $optimismWellBeingIndicator
+            )`;
+
+        const values = {
+            $date: this.date,
+            $personId: this.personId,
+            $inconsistencyIndex: this.inconsistencyIndex,
+            $positiveImpression: this.positiveImpression,
+            $negativeImpression: this.negativeImpression,
+            $item133Response: this.item133Response,
+            $totalEmotionalIntelligence: this.totalEmotionalIntelligence,
+            $selfPerceptionComposite: this.selfPerceptionComposite,
+            $selfRegard: this.selfRegard,
+            $selfActualization: this.selfActualization,
+            $emotionalSelfAwareness: this.emotionalSelfAwareness,
+            $selfExpressionComposite: this.selfExpressionComposite,
+            $emotionalExpression: this.emotionalExpression,
+            $assertiveness: this.assertiveness,
+            $independence: this.independence,
+            $interpersonalComposite: this.interpersonalComposite,
+            $interpersonalRelationships: this.interpersonalRelationships,
+            $empathy: this.empathy,
+            $socialResponsibility: this.socialResponsibility,
+            $decisionMakingComposite: this.decisionMakingComposite,
+            $problemSolving: this.problemSolving,
+            $realityTesting: this.realityTesting,
+            $impulseControl: this.impulseControl,
+            $stressManagementComposite: this.stressManagementComposite,
+            $flexibility: this.flexibility,
+            $stressTolerance: this.stressTolerance,
+            $optimismWellBeingIndicator: this.optimismWellBeingIndicator
+        };
+
+        return TheDb.update(sql, values)
+            .then((result) => {
+                if (result.changes !== 1) {
+                    throw new Error(`Expected 1 Assesment to be updated. Was ${result.changes}`);
+                }
+            });
+    }
+
+    public delete(): Promise<void> {
+        const sql = `
+            DELETE FROM assesment WHERE id = $id`;
+
+        const values = {
+            $id: this.id,
+        };
+
+        return TheDb.delete(sql, values)
+            .then((result) => {
+                if (result.changes !== 1) {
+                    throw new Error(`Expected 1 Assesment to be deleted. Was ${result.changes}`);
+                }
+            });
+    }
+
+    public fromRow(row: object): Assesment {
+        this.id = row['id'];
+        this.personId = row['personId'];
+        this.inconsistencyIndex = row['inconsistencyIndex'];
+        this.positiveImpression = row['positiveImpression'];
+        this.negativeImpression = row['negativeImpression'];
+        this.item133Response = row['item133Response'];
+        this.totalEmotionalIntelligence = row['totalEmotionalIntelligence'];
+        this.selfPerceptionComposite = row['selfPerceptionComposite'];
+        this.selfRegard = row['selfRegard'];
+        this.selfActualization = row['selfActualization'];
+        this.emotionalSelfAwareness = row['emotionalSelfAwareness'];
+        this.selfExpressionComposite = row['selfExpressionComposite'];
+        this.emotionalExpression = row['emotionalExpression'];
+        this.assertiveness = row['assertiveness'];
+        this.independence = row['independence'];
+        this.interpersonalComposite = row['interpersonalComposite'];
+        this.interpersonalRelationships = row['interpersonalRelationships'];
+        this.empathy = row['empathy'];
+        this.socialResponsibility = row['socialResponsibility'];
+        this.decisionMakingComposite = row['decisionMakingComposite'];
+        this.problemSolving = row['problemSolving'];
+        this.realityTesting = row['realityTesting'];
+        this.impulseControl = row['impulseControl'];
+        this.stressManagementComposite = row['stressManagementComposite'];
+        this.flexibility = row['flexibility'];
+        this.stressTolerance = row['stressTolerance'];
+        this.optimismWellBeingIndicator = row['optimismWellBeingIndicator'];
+        return this;
+    }
 
 }

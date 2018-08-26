@@ -1,0 +1,40 @@
+{
+    "name": "./database.db",
+    "version": 1,
+    "tables": {
+        "person": [
+		    {
+		        "id": "11",
+		        "firstName": "Bob",
+		        "lastName": "Shrantz",
+		        "dateOfBirth": "2018-08-12T14:10:37.184Z",
+		        "clergyStatus": "Full Elder",
+		        "district": "d1"
+			},
+			{
+		        "id": "12",
+		        "firstName": "Bob",
+		        "lastName": "Shrantz2",
+		        "dateOfBirth": "2018-08-12T14:10:37.184Z",
+		        "clergyStatus": "Full Elder",
+		        "district": "d1"
+			},
+			{
+		        "id": "13",
+		        "firstName": "Bob",
+		        "lastName": "Shrantz3",
+		        "dateOfBirth": "2018-08-12T14:10:37.184Z",
+		        "clergyStatus": "Full Elder",
+		        "district": "d1"
+			},
+			{
+		        "id": "14",
+		        "firstName": "Bob",
+		        "lastName": "Shrantz4",
+		        "dateOfBirth": "2018-08-12T14:10:37.184Z",
+		        "clergyStatus": "Full Elder",
+		        "district": "d1"
+		    }
+		]
+	}
+}
