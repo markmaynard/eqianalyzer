@@ -91,7 +91,7 @@ export class Person {
             $firstName: this.firstName,
             $lastName: this.lastName,
             $dateOfBirth: this.dateOfBirth,
-            $clergyStatus: ClergyStatus[this.clergyStatus],
+            $clergyStatus: this.clergyStatus,
             $district: this.district
         };
 
@@ -164,15 +164,25 @@ export class Person {
         return this;
     }
 
-    /*public static fromCSVImportRow(row: object): Person {
-        this.firstName = row['firstName'];
-        this.lastName = row['lastName'];
-        this.dateOfBirth =new Date(row['dateOfBirth']);
-        this.clergyStatus = ClergyStatus[<string>row['clergyStatus']];
-        this.district = row['district'];
-        Person.getByFirstNameLastNameAndDOB(row['firstName'], row['lastName'], new Date(row['dateOfBirth'])).pipe( person => person).catch(err => {
-            
-        })
-        return this;
-    }*/
+    public static fromCSVImportRow(data: object): Observable<Person> {
+        let row = data[0];
+        let firstName = row['firstName'];
+        let lastName = row['lastName'];
+        console.log(row['dateOfBirth']);
+        let dateOfBirth =new Date(row['dateOfBirth']);
+        let clergyStatus = (<string>row['clergyStatus']) as ClergyStatus;
+        let district = row['district'];
+        return Person.getByFirstNameLastNameAndDOB(row['firstName'], row['lastName'], new Date(row['dateOfBirth']))
+            .pipe(
+                catchError(error => {
+                    let p: Person = new Person();
+                    p.firstName = firstName;
+                    p.lastName = lastName;
+                    p.dateOfBirth = dateOfBirth;
+                    p.clergyStatus = clergyStatus;
+                    p.district = district;
+                    return p.insert().pipe( map(r => p));
+                })
+            )
+    }
 }

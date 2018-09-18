@@ -349,6 +349,7 @@ export class Assesment {
     public fromRow(row: object): Assesment {
         this.id = row['id'];
         this.personId = row['personId'];
+        this.date = row['date'];
         this.inconsistencyIndex = row['inconsistencyIndex'];
         this.positiveImpression = row['positiveImpression'];
         this.negativeImpression = row['negativeImpression'];
@@ -377,4 +378,36 @@ export class Assesment {
         return this;
     }
 
+    public static fromCSVImportRow(row: object, personId: Number): Observable<Assesment> {
+        let assesment: Assesment = new Assesment();
+        assesment.personId = personId;
+        assesment.date = new Date(row['date']);
+        assesment.inconsistencyIndex = row['inconsistencyIndex'];
+        assesment.positiveImpression = row['positiveImpression'];
+        assesment.negativeImpression = row['negativeImpression'];
+        assesment.item133Response = row['item133Response'];
+        assesment.totalEmotionalIntelligence = row['totalEmotionalIntelligence'];
+        assesment.selfPerceptionComposite = row['selfPerceptionComposite'];
+        assesment.selfRegard = row['selfRegard'];
+        assesment.selfActualization = row['selfActualization'];
+        assesment.emotionalSelfAwareness = row['emotionalSelfAwareness'];
+        assesment.selfExpressionComposite = row['selfExpressionComposite'];
+        assesment.emotionalExpression = row['emotionalExpression'];
+        assesment.assertiveness = row['assertiveness'];
+        assesment.independence = row['independence'];
+        assesment.interpersonalComposite = row['interpersonalComposite'];
+        assesment.interpersonalRelationships = row['interpersonalRelationships'];
+        assesment.empathy = row['empathy'];
+        assesment.socialResponsibility = row['socialResponsibility'];
+        assesment.decisionMakingComposite = row['decisionMakingComposite'];
+        assesment.problemSolving = row['problemSolving'];
+        assesment.realityTesting = row['realityTesting'];
+        assesment.impulseControl = row['impulseControl'];
+        assesment.stressManagementComposite = row['stressManagementComposite'];
+        assesment.flexibility = row['flexibility'];
+        assesment.stressTolerance = row['stressTolerance'];
+        assesment.optimismWellBeingIndicator = row['optimismWellBeingIndicator'];
+        return assesment.insert().pipe(map(()=>assesment));
+    }
+    
 }

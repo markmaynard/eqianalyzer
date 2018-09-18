@@ -1,12 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, NgZone } from '@angular/core';
 import * as fs from 'fs';
-import * as path from 'path';
 
 // tslint:disable-next-line:no-implicit-dependencies
 import { Menu, MenuItemConstructorOptions, OpenDialogOptions, remote } from 'electron';
 
 // import { Hero } from './model/hero';
 import { Person } from './entity/person.entity';
+import { Assesment } from './entity/assesment.entity'
 import { Settings } from './model/settings';
 import { TheDb } from './model/thedb';
 import { DbService } from './services/db.service'
@@ -16,9 +16,8 @@ import '../assets/sass/style.scss';
 import { parse } from 'papaparse';
 import { readFileSync } from 'fs';
 
-
-import { Observable, EMPTY, forkJoin, Observer} from'rxjs'
 import { map, flatMap, catchError } from 'rxjs/operators';
+import {MenuItem} from 'primeng/api';
 
 @Component({
     selector: 'app',
@@ -26,13 +25,40 @@ import { map, flatMap, catchError } from 'rxjs/operators';
 })
 export class AppComponent implements OnInit{
     public people: Person[];
+    public menuItems: MenuItem[];
 
-    constructor(private dbService : DbService) {
+    constructor(
+        private dbService : DbService,
+        private zone: NgZone) {
         Settings.initialize();
+    }
 
-        
+    ngOnInit(){
+        this.menuItems = [
+            {
+                label: 'File',
+                items: [{
+                        label: 'New', 
+                        icon: 'pi pi-fw pi-plus',
+                        items: [
+                            {label: 'Project'},
+                            {label: 'Other'},
+                        ]
+                    },
+                    {label: 'Open'},
+                    {label: 'Quit'}
+                ]
+            },
+            {
+                label: 'Edit',
+                icon: 'pi pi-fw pi-pencil',
+                items: [
+                    {label: 'Delete', icon: 'pi pi-fw pi-trash'},
+                    {label: 'Refresh', icon: 'pi pi-fw pi-refresh'}
+                ]
+            }
+        ];
 
-        
         if (fs.existsSync(Settings.dbPath)) {
             this.openDb(Settings.dbPath);
         } else if (Settings.hasFixedDbLocation) {
@@ -40,9 +66,6 @@ export class AppComponent implements OnInit{
         } else {
             this.createDb();
         }
-    }
-
-    ngOnInit(){
         // no-op
     }
 
@@ -57,7 +80,7 @@ export class AppComponent implements OnInit{
                 }),
                 map(() => this.getPeople())
             ).subscribe(
-                () => {},
+                () =>  {console.log('DB opened')},
                 (reason) => {
                     // Handle errors
                     console.log('Error occurred while opening database: ', reason);
@@ -87,16 +110,18 @@ export class AppComponent implements OnInit{
         TheDb.createDb(filename)
             .pipe(
                 map((dbPath) => {
+                    console.log('app1');
                     if (!Settings.hasFixedDbLocation) {
                         Settings.dbPath = dbPath;
                         Settings.write();
                     }
                 }),
                 map(() => {
+                    console.log('Database opened, getting people');
                     this.getPeople();
                 })
             ).subscribe(
-                () => {},
+                () => { console.log('DB created')},
                 (reason) => {
                     console.log(reason);
                 }
@@ -114,7 +139,12 @@ export class AppComponent implements OnInit{
     public getPeople() {
         Person.getAll()
             .subscribe((people) => {
+                this.zone.run(()=>{
+                console.log('GOT PEOPLE!!!');
+                console.log(people);
+                console.log(this);
                 this.people = people;
+                });
             });
     }
 
@@ -161,15 +191,31 @@ export class AppComponent implements OnInit{
         }
 
         const file = readFileSync(filenames[0], 'utf8');
-
+        let rowIndex = 1;
+        let errors: string[]= [];
         parse(file, {
             header: true,
             dynamicTyping: true,
-            step: function(row) {
+            step: (row) => {
               console.log("Row:", row.data);
+              Person.fromCSVImportRow(row.data)
+                .pipe(
+                    flatMap((p: Person) => {
+                        return Assesment.fromCSVImportRow(row, p.id);
+                    })
+                ).subscribe(
+                    ()=>{
+                        this.getPeople();
+                    },
+                    (err: Error) => { 
+                        errors.push(`Error:(${rowIndex}: Import failed: ${err.message} `);
+                    }
+                )
+                rowIndex++;
             },
-            complete: function() {
+            complete: () => {
               console.log("All done!");
+              //setTimeout(this.getPeople(), 3000);
             }
           });
 

@@ -23,6 +23,7 @@ export class TheDb {
 
     public static selectOne(sql: string, values: {}): Observable<{}> {
         return Observable.create((observer: Observer<{}>) => {
+            console.log('selectOne');
             TheDb.db.get(sql, values, (err, row) => {
                 if (err) {
                     observer.error(err);
@@ -204,7 +205,7 @@ export class TheDb {
     public static createDb(dbPath: string): Observable<string> {
         dbPath += path.extname(dbPath) === '.db' ? '' : '.db';
 
-        console.log('Creating  databae: ', dbPath);
+        console.log('Creating  database: ', dbPath);
 
         const dataPath = path.join(Settings.dbFolder, `database.init.json`);
         const schemaPath = path.join(Settings.dbFolder, `database.db.sql`);
@@ -215,13 +216,14 @@ export class TheDb {
             fs.mkdirSync(path.join(dbPath, '..'));
         }
 
+        console.log('############');
         return TheDb.getDb(dbPath)
             .pipe(
                 flatMap(() => TheDb.exec(schema)),
                 flatMap(() => TheDb.setPragmaForeignKeys(true)),
-                flatMap(() => TheDb.importJson(dataPath, false)),
+                //flatMap(() => TheDb.importJson(dataPath, false)),
                 flatMap(TheDb.setPragmaVersion),
-                flatMap(() => {
+                map(() => {
                     console.log('Database created.');
                     return dbPath;
                 })
@@ -242,9 +244,12 @@ export class TheDb {
     }
 
     public static closeDb(): Observable<void> {
+        console.log('closeDb');
         return Observable.create((observer: Observer<void>) => {
             if (!TheDb.db) {
-                return
+                console.log('no db to close')
+                observer.next(undefined);
+                observer.complete();
             }
             return TheDb.db.close((err) => {
                 console.log('Closing current Db');
@@ -260,14 +265,18 @@ export class TheDb {
     }
 
     private static getDb(dbPath: string): Observable<void> {
+        console.log('getDb');
         return TheDb.closeDb()
             .pipe(
                 flatMap(() => {
+                    console.log('getDb flatmap');
                     return Observable.create((observer: Observer<void>) => {
                         const db = new Database(dbPath, (err) => {
                             if (err) {
+                                console.log(err);
                                 observer.error(err);
                             } else {
+                                console.log('setting Db');
                                 TheDb.db = db;
                                 observer.next(undefined);
                                 observer.complete();
@@ -316,11 +325,13 @@ export class TheDb {
     }
 
     private static exec(sql: string): Observable<void> {
+        console.log('exec go!');
         return Observable.create((observer: Observer<void>) => {
             TheDb.db.exec(sql, (err) => {
                 if (err) {
                     observer.error(err);
                 } else {
+                    console.log('exec complete');
                     observer.next(undefined);
                     observer.complete();
                 }
