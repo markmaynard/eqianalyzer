@@ -1,4 +1,8 @@
+import { Injectable } from '@angular/core';
 
+@Injectable({
+    providedIn: 'root'
+  })
 export class AssesmentQueryBuilder {
     POSSIBLE_FILTER_OPTIONS: FilterOption[] = [
     {fieldName: "date", fieldType: FieldType.Date},
@@ -29,10 +33,9 @@ export class AssesmentQueryBuilder {
     {fieldName: "optimismWellBeingIndicator", fieldType: FieldType.Number}
     ];
 
+    public filters: IFilter[] = [];
 
-    constructor(
-        public filters: IFilter[]
-    ) {}
+    constructor() {}
 
     getAvailableFilterOptions(): FilterOption[] {
         return this.POSSIBLE_FILTER_OPTIONS.filter( (option: FilterOption) => {
@@ -75,16 +78,23 @@ export class AssesmentQueryBuilder {
 
     getFilterValues(): {} {
         let values = {};
-        let valuesString = '{';
+        let valuesString = '{ ';
         for(let filter of this.filters) {
             for(let value of filter.getWhereValues()) {
-                valuesString = query + vstring + ' AND '
+                valuesString = valuesString + value + ', '
             }
         }
+        valuesString = valuesString.slice(0, -2);
+        valuesString = valuesString + ' }';
+        console.log(valuesString);
+        values = JSON.parse(valuesString);
         return values;
     }
 }
 
+@Injectable({
+    providedIn: 'root'
+  })
 export class FilterOption {
     fieldName: string;
     fieldType: FieldType
@@ -96,24 +106,27 @@ export enum FieldType {
     Date
 }
 
-interface IFilter {
+export interface IFilter {
     filterOption: FilterOption;
-    start: any;
-    stop: any;
+    start?: any;
+    stop?: any;
     getWhereClause(): string[];
     getWhereValuesStrings(): string[];
     getWhereValues(): {}[];
 }
 
+@Injectable({
+    providedIn: 'root'
+  })
 export class NumberFilter implements IFilter {
-    start: number;
-    stop: number;
+    start?: number;
+    stop?: number;
 
     constructor(
         public filterOption: FilterOption,
     ) {
-        if (this.filterOption.fieldType != FieldType.Number) {
-            throw new Error("Class NumberFilter only accepts filterOptions of fieldType Number");
+        if (this.filterOption.fieldType !== FieldType.Number) {
+            throw new Error(`Class NumberFilter only accepts filterOptions of fieldType Number ${this.filterOption.fieldName}`);
         }
     }
 
@@ -131,10 +144,10 @@ export class NumberFilter implements IFilter {
     getWhereValuesStrings(): string[] {
         let values: string[] = [];
         if(this.start) {
-            values.push(`\$${this.filterOption.fieldName}_start`);
+            values.push(`T${this.filterOption.fieldName}_start >= ${this.start}`);
         }
         if(this.stop) {
-            values.push(`\$${this.filterOption.fieldName}_stop`);
+            values.push(`T${this.filterOption.fieldName}_stop <= ${this.stop}`);
         }
         return values;
     }
@@ -142,24 +155,27 @@ export class NumberFilter implements IFilter {
     getWhereValues(): string[] {
         let values: string[] = [];
         if(this.start) {
-            values.push(`'\$${this.filterOption.fieldName}_start': ${this.start}`);
+            values.push(`"T${this.filterOption.fieldName}_start": ${this.start}`);
         }
         if(this.stop) {
-            values.push(`'\$${this.filterOption.fieldName}_stop': ${this.stop}`);
+            values.push(`"T$${this.filterOption.fieldName}_stop": ${this.stop}`);
         }
         return values;
     }
 
 }
 
+@Injectable({
+    providedIn: 'root'
+  })
 export class DateFilter implements IFilter {
-    start: Date;
-    stop: Date;
+    start?: Date;
+    stop?: Date;
 
     constructor(
         public filterOption: FilterOption,
     ) {
-        if (this.filterOption.fieldType != FieldType.Number) {
+        if (this.filterOption.fieldType != FieldType.Date) {
             throw new Error("Class DateFilter only accepts filterOptions of fieldType Date");
         }
     }

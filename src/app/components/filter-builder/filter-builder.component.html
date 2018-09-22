@@ -1,0 +1,17 @@
+<div>
+    <span>Filters</span>
+    <p-button (onClick)="buildQuery()">Build Query</p-button>
+    {{query}}
+    <div *ngFor="let filter of filters">
+        <span>{{filter.filterOption.fieldType}}</span>
+        {{filter.filterOption.fieldName}}
+        <div [ngSwitch]="filter.filterOption.fieldType">
+                <span>{{filter.filterOption.fieldType}}</span>
+                {{filter.filterOption.fieldName}}
+            <div *ngSwitchCase="fieldType.Number">
+                <num-filter [numberFilter]="filter" (deleteFilter)="deleteFilter($event)"></num-filter>
+            </div>
+            <div *ngSwitchDefault>...</div>
+        </div>
+    </div>
+</div>

@@ -1,3 +1,14 @@
 <div>
+    <span>Filter Name:</span>
     <span>{{filter.filterOption.fieldName}}</span>
+    <form [formGroup]="rangeForm">
+  
+            <label for="start">From: </label>
+            <input id="start" type="number" step=".01" formControlName="start">
+          
+            <label for="stop">To: </label>
+            <input id="start" type="number" step=".01" formControlName="stop">
+          
+            <p-button (onClick)="delete()" label="Delete"></p-button>
+    </form>
 </div>

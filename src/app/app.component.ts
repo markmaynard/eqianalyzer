@@ -10,6 +10,7 @@ import { Assesment } from './entity/assesment.entity'
 import { Settings } from './model/settings';
 import { TheDb } from './model/thedb';
 import { DbService } from './services/db.service'
+import { FilterBuilderComponent } from './components/filter-builder/filter-builder.component'
 
 // Importing style.scss allows webpack to bundle stylesheet with application
 import '../assets/sass/style.scss';
