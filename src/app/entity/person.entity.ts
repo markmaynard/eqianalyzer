@@ -65,6 +65,30 @@ export class Person {
             );
     }
 
+    public static getByFirstNameLastName(firstName: string, lastName: string): Observable<Person[]> {
+        const sql = 'SELECT * FROM person WHERE firstName = $firstName AND lastName = $lastName';
+        const values = { 
+            $firstName: firstName,
+            $lastName:  lastName
+        };
+
+        return TheDb.selectAll(sql, values)
+            .pipe(
+                map((rows) => {
+                    if (rows) {
+                        const people: Person[] = [];
+                    for (const row of rows) {
+                        const person = new Person().fromRow(row);
+                        people.push(person);
+                    }
+                    return people;
+                    } else {
+                        throw new Error('Expected to find 1 Person. Found 0.');
+                    }
+                })
+            );
+    }
+
     public static getAll(): Observable<Person[]> {
         const sql = `SELECT * FROM person ORDER BY lastName, firstName`;
         const values = {};
@@ -72,12 +96,12 @@ export class Person {
         return TheDb.selectAll(sql, values)
             .pipe(
                 map((rows) => {
-                    const persones: Person[] = [];
+                    const people: Person[] = [];
                     for (const row of rows) {
                         const person = new Person().fromRow(row);
-                        persones.push(person);
+                        people.push(person);
                     }
-                    return persones;
+                    return people;
                 })
             );
     }
