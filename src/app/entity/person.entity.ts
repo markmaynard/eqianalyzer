@@ -114,7 +114,7 @@ export class Person {
         const values = {
             $firstName: this.firstName,
             $lastName: this.lastName,
-            $dateOfBirth: this.dateOfBirth,
+            $dateOfBirth: this.dateOfBirth.toISOString(),
             $clergyStatus: this.clergyStatus,
             $district: this.district
         };

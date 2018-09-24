@@ -4,6 +4,7 @@ import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { NumberFilter, AssesmentQueryBuilder, FilterOption, IFilter, FieldType, DateFilter } from '../../services/assesment-query-builder.service';
 import { Person } from '../../entity/person.entity';
 import { MessageService } from 'primeng/api';
+import { TheDb } from '../../model/thedb';
 @Component({
     selector: 'filter-builder',
     templateUrl: 'filter-builder.component.html',
@@ -12,10 +13,10 @@ export class FilterBuilderComponent implements OnInit {
 
     fieldType = FieldType;
     filters: IFilter[] = [];
-    query: String;
+    query: string;
     values: {};
     people: Person[] = [];
-    submitted: Boolean = false;
+    submitted: boolean = false;
     personForm = new FormGroup({
         firstName: new FormControl('', Validators.required),
         lastName: new FormControl('', Validators.required),
@@ -48,6 +49,7 @@ export class FilterBuilderComponent implements OnInit {
             Person.getByFirstNameLastName(firstName.value, lastName.value).subscribe( (peeps: Person[]) => {
                 console.log(peeps);
                 this.people = peeps;
+                this.assesmentQueryBuilder.personIds = this.people.map(p => p.id);
             });
         }
     }
@@ -59,7 +61,11 @@ export class FilterBuilderComponent implements OnInit {
     buildQuery() {
         this.assesmentQueryBuilder.filters = this.filters;
         this.query = this.assesmentQueryBuilder.getFilterQuery();
-        this.values = this.assesmentQueryBuilder.getFilterValues();
-        console.log(this.values);
+        // this.values = this.assesmentQueryBuilder.getFilterValues();
+        // console.log(this.values);
+        TheDb.selectAll(this.query, {}).subscribe(res => {
+            console.log("Results:");
+            console.log(res);
+        });
     }
 }

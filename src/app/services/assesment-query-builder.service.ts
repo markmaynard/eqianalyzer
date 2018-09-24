@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { isNumber } from 'util';
 
 @Injectable({
     providedIn: 'root'
@@ -35,6 +36,8 @@ export class AssesmentQueryBuilder {
 
     public filters: IFilter[] = [];
 
+    public personIds: number[] = [];
+
     constructor() {}
 
     getAvailableFilterOptions(): FilterOption[] {
@@ -59,13 +62,17 @@ export class AssesmentQueryBuilder {
     }
 
     getFilterQuery(): string {
-        let query: string = 'SELECT '
+        let query: string = 'SELECT personId, '
 
         for(let filter of this.filters) {
             query = query + filter.filterOption.fieldName + ', '
         }
         query = query.slice(0, -2);
+        query = query + ' FROM assesment';
         query = query + ' WHERE ';
+        if(this.personIds.length > 0) {
+            query = query + this.getPersonIdsInWhereClause() + ' AND ';
+        }
         for(let filter of this.filters) {
             for(let vstring of filter.getWhereValuesStrings()) {
                 query = query + vstring + ' AND '
@@ -77,18 +84,31 @@ export class AssesmentQueryBuilder {
     }
 
     getFilterValues(): {} {
-        let values = {};
-        let valuesString = '{ ';
-        for(let filter of this.filters) {
-            for(let value of filter.getWhereValues()) {
-                valuesString = valuesString + value + ', '
+        if(this.filters.length > 0) {
+            let values = {};
+            let valuesString = '{ ';
+            for(let filter of this.filters) {
+                for(let value of filter.getWhereValues()) {
+                    valuesString = valuesString + value + ', '
+                }
             }
+            valuesString = valuesString.slice(0, -2);
+            valuesString = valuesString + ' }';
+            console.log(valuesString);
+            values = JSON.parse(valuesString);
+            return values;
         }
-        valuesString = valuesString.slice(0, -2);
-        valuesString = valuesString + ' }';
-        console.log(valuesString);
-        values = JSON.parse(valuesString);
-        return values;
+        return {};
+    }
+
+    getPersonIdsInWhereClause(): String {
+        let clause = "personId in ("
+        for(let id of this.personIds) {
+            clause = clause + `${id},`;
+        }
+        clause = clause.slice(0,-1);
+        clause = clause + ')';
+        return clause;
     }
 }
 
@@ -143,11 +163,11 @@ export class NumberFilter implements IFilter {
 
     getWhereValuesStrings(): string[] {
         let values: string[] = [];
-        if(this.start) {
-            values.push(`T${this.filterOption.fieldName}_start >= ${this.start}`);
+        if(isNumber(this.start)) {
+            values.push(`${this.filterOption.fieldName} >= ${this.start}`);
         }
-        if(this.stop) {
-            values.push(`T${this.filterOption.fieldName}_stop <= ${this.stop}`);
+        if(isNumber(this.stop)) {
+            values.push(`${this.filterOption.fieldName} <= ${this.stop}`);
         }
         return values;
     }
@@ -158,7 +178,7 @@ export class NumberFilter implements IFilter {
             values.push(`"T${this.filterOption.fieldName}_start": ${this.start}`);
         }
         if(this.stop) {
-            values.push(`"T$${this.filterOption.fieldName}_stop": ${this.stop}`);
+            values.push(`"T${this.filterOption.fieldName}_stop": ${this.stop}`);
         }
         return values;
     }

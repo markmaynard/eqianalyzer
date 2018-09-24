@@ -1,42 +1,52 @@
 <p-menubar [model]="menuItems"></p-menubar>
-
-<div class="container">
-    <div class="row">
-        <div class="col">
-            <h2>My Heroes</h2>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Name</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let person of people">
-                        <th scope="row">{{person.id}}</th>
-                        <td>
-                            <button class="btn btn-link" (click)="onMenu(person)">{{person.firstName}} {{person.Lastname}}</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col">
-            <button class="btn btn-outline-primary" (click)="onRestoreDb()">Restore Db</button>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col">
-            <button class="btn btn-outline-primary" (click)="onImportFromCSV()">Import from CSV</button>
-        </div>
-    </div>
-    <div class="row">
-        <filter-builder></filter-builder>
-    </div>
+<p-tabView>
+        <p-tabPanel header="Load Data">
+                <div class="container">
+                <div class="row">
+                        <div class="col">
+                            <button class="btn btn-outline-primary" (click)="onRestoreDb()">Restore Db</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <button class="btn btn-outline-primary" (click)="onImportFromCSV()">Import from CSV</button>
+                        </div>
+                    </div>
+                    </div>
+        </p-tabPanel>
+        <p-tabPanel header="View People">
+                <div class="container">
+                        <div class="row">
+                            <div class="col">
+                                <h2>People</h2>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">#</th>
+                                            <th scope="col">Name</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let person of people">
+                                            <th scope="row">{{person.id}}</th>
+                                            <td>
+                                                <button class="btn btn-link" (click)="onMenu(person)">{{person.firstName}} {{person.Lastname}}</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+        </p-tabPanel>
+        <p-tabPanel header="Run Query">
+                <div class="container">
+                        <filter-builder></filter-builder>
 </div>
+        </p-tabPanel>
+    </p-tabView>
+
