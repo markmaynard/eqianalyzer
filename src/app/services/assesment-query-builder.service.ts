@@ -6,7 +6,7 @@ import { isNumber } from 'util';
   })
 export class AssesmentQueryBuilder {
     POSSIBLE_FILTER_OPTIONS: FilterOption[] = [
-    {fieldName: "date", fieldType: FieldType.Date},
+    // {fieldName: "date", fieldType: FieldType.Date},
     {fieldName: 'inconsistencyIndex', fieldType: FieldType.Number},
     {fieldName: "positiveImpression", fieldType: FieldType.Number},
     {fieldName: "negativeImpression", fieldType: FieldType.Number},

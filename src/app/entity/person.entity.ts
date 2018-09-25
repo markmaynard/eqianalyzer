@@ -50,7 +50,7 @@ export class Person {
         const values = { 
             $firstName: firstName,
             $lastName:  lastName,
-            $dateOfBirth: dob.toISOString()
+            $dateOfBirth: dob.toUTCString()
         };
 
         return TheDb.selectOne(sql, values)
@@ -114,7 +114,7 @@ export class Person {
         const values = {
             $firstName: this.firstName,
             $lastName: this.lastName,
-            $dateOfBirth: this.dateOfBirth.toISOString(),
+            $dateOfBirth: this.dateOfBirth.toUTCString(),
             $clergyStatus: this.clergyStatus,
             $district: this.district
         };

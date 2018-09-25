@@ -28,11 +28,13 @@
                                         <tr>
                                             <th scope="col">#</th>
                                             <th scope="col">Name</th>
+                                            <th scope="col">Dob</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr *ngFor="let person of people">
                                             <th scope="row">{{person.id}}</th>
+                                            <th scope="row">{{person.dobNum}}</th>
                                             <td>
                                                 <button class="btn btn-link" (click)="onMenu(person)">{{person.firstName}} {{person.Lastname}}</button>
                                             </td>

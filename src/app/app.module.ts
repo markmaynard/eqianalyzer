@@ -8,6 +8,8 @@ import { MenubarModule } from 'primeng/primeng';
 import { ButtonModule } from 'primeng/button';
 import { MessageModule, KeyFilterModule } from 'primeng/primeng';
 import { TabViewModule } from 'primeng/tabview';
+import { DropdownModule } from 'primeng/dropdown';
+import { CalendarModule } from 'primeng/calendar';
 
 import { AppComponent } from './app.component';
 import { FilterBuilderComponent } from './components/filter-builder/filter-builder.component';
@@ -23,6 +25,8 @@ import { AssesmentQueryBuilder } from './services/assesment-query-builder.servic
         TabViewModule,
         KeyFilterModule,
         ButtonModule,
+        DropdownModule,
+        CalendarModule,
         RouterModule,
         FormsModule,
         ReactiveFormsModule

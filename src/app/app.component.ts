@@ -144,7 +144,9 @@ export class AppComponent implements OnInit{
                 console.log('GOT PEOPLE!!!');
                 console.log(people);
                 console.log(this);
-                this.people = people;
+                this.people = people.map( p => {
+                    return Object.assign(p,{dobNum:Math.round(p.dateOfBirth.getTime() / 1000)});
+                });
                 });
             });
     }

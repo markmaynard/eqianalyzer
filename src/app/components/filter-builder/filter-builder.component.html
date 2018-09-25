@@ -27,6 +27,14 @@
                             <p-message severity="error" text="Lastname is required" *ngIf="!personForm.controls['lastName'].valid&&personForm.controls['lastName'].dirty"></p-message>
                         </div>
                     </div>
+                    <div class="ui-grid-row">
+                            <div class="ui-grid-col-2">
+                                Date of Birth:
+                            </div>
+                            <div class="ui-grid-col-6">
+                                <p-calendar [(ngModel)]="dobValue" showButtonBar="true" showIcon="true" [ngModelOptions]="{standalone: true}"></p-calendar>
+                            </div>
+                    </div>
           
                     <p-button type="submit" [disabled]="!personForm.valid" label="Submit"></p-button>
             </div>
@@ -35,20 +43,24 @@
         {{person.firstName}}
     </div>
         <div *ngIf="people.length > 0">
-        <span>Assesment Filters</span>
-        <p-button (onClick)="buildQuery()">Build Query</p-button>
-        {{query}}
-        <div *ngFor="let filter of filters">
-            <span>{{filter.filterOption.fieldType}}</span>
-            {{filter.filterOption.fieldName}}
-            <div [ngSwitch]="filter.filterOption.fieldType">
-                    <span>{{filter.filterOption.fieldType}}</span>
-                    {{filter.filterOption.fieldName}}
-                <div *ngSwitchCase="fieldType.Number">
-                    <num-filter [numberFilter]="filter" (deleteFilter)="deleteFilter($event)"></num-filter>
+            <span>Assesment Filters</span>
+            <p-button (onClick)="buildQuery()">Build Query</p-button>
+            {{query}}
+            <div *ngFor="let filter of filters">
+                <span>{{filter.filterOption.fieldType}}</span>
+                {{filter.filterOption.fieldName}}
+                <div [ngSwitch]="filter.filterOption.fieldType">
+                        <span>{{filter.filterOption.fieldType}}</span>
+                        {{filter.filterOption.fieldName}}
+                    <div *ngSwitchCase="fieldType.Number">
+                        <num-filter [numberFilter]="filter" (deleteFilter)="deleteFilter($event)"></num-filter>
+                    </div>
+                    <div *ngSwitchDefault>...</div>
                 </div>
-                <div *ngSwitchDefault>...</div>
             </div>
+            <form [formGroup]="fieldSelectForm" (ngSubmit)="addFilter(fieldSelectForm.value.selectedField)">
+                <p-dropdown [options]="availableFieldsSelectOptions" placeholder="Select a filter" formControlName="selectedField"></p-dropdown>
+                <p-button type="submit" [disabled]="availableFieldsSelectOptions.length == 0" label="Add Filter"></p-button>
+            </form>
         </div>
-    </div>
 </div>
