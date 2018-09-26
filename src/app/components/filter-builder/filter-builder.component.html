@@ -4,63 +4,71 @@
     </div>
     <form [formGroup]="personForm" (ngSubmit)="onSubmit(personForm.value)">
   
-            <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid" style="margin: 10px 0px">
-                    <div class="ui-grid-row">
+        <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid" style="margin: 10px 0px">
+                <div class="ui-grid-row">
+                    <div class="ui-grid-col-2">
+                        First Name *:
+                    </div>
+                    <div class="ui-grid-col-6">
+                        <input pInputText type="text" formControlName="firstName" placeholder="Required"/>
+                    </div>
+                    <div class="ui-grid-col-4">
+                        <p-message severity="error" text="Firstname is required" *ngIf="!personForm.controls['firstName'].valid&&personForm.controls['firstName'].dirty"></p-message>
+                    </div>
+                </div>
+                <div class="ui-grid-row">
+                    <div class="ui-grid-col-2">
+                        Last Name *:
+                    </div>
+                    <div class="ui-grid-col-6">
+                        <input pInputText type="text" formControlName="lastName" placeholder="Required"/>
+                    </div>
+                    <div class="ui-grid-col-4">
+                        <p-message severity="error" text="Lastname is required" *ngIf="!personForm.controls['lastName'].valid&&personForm.controls['lastName'].dirty"></p-message>
+                    </div>
+                </div>
+                <div class="ui-grid-row">
                         <div class="ui-grid-col-2">
-                            First Name *:
+                            Date of Birth:
                         </div>
                         <div class="ui-grid-col-6">
-                            <input pInputText type="text" formControlName="firstName" placeholder="Required"/>
+                            <p-calendar [(ngModel)]="dobValue" showButtonBar="true" showIcon="true" [ngModelOptions]="{standalone: true}"></p-calendar>
                         </div>
-                        <div class="ui-grid-col-4">
-                            <p-message severity="error" text="Firstname is required" *ngIf="!personForm.controls['firstName'].valid&&personForm.controls['firstName'].dirty"></p-message>
-                        </div>
-                    </div>
-                    <div class="ui-grid-row">
-                        <div class="ui-grid-col-2">
-                            Last Name *:
-                        </div>
-                        <div class="ui-grid-col-6">
-                            <input pInputText type="text" formControlName="lastName" placeholder="Required"/>
-                        </div>
-                        <div class="ui-grid-col-4">
-                            <p-message severity="error" text="Lastname is required" *ngIf="!personForm.controls['lastName'].valid&&personForm.controls['lastName'].dirty"></p-message>
-                        </div>
-                    </div>
-                    <div class="ui-grid-row">
-                            <div class="ui-grid-col-2">
-                                Date of Birth:
-                            </div>
-                            <div class="ui-grid-col-6">
-                                <p-calendar [(ngModel)]="dobValue" showButtonBar="true" showIcon="true" [ngModelOptions]="{standalone: true}"></p-calendar>
-                            </div>
-                    </div>
-          
-                    <p-button type="submit" [disabled]="!personForm.valid" label="Submit"></p-button>
-            </div>
+                </div>
+        
+                <p-button type="submit" [disabled]="!personForm.valid" label="Submit"></p-button>
+        </div>
     </form>
     <div *ngFor="let person of people">
         {{person.firstName}}
     </div>
         <div *ngIf="people.length > 0">
-            <span>Assesment Filters</span>
-            <p-button (onClick)="buildQuery()">Build Query</p-button>
-            {{query}}
-            <div *ngFor="let filter of filters">
-                <span>{{filter.filterOption.fieldType}}</span>
-                {{filter.filterOption.fieldName}}
-                <div [ngSwitch]="filter.filterOption.fieldType">
-                        <span>{{filter.filterOption.fieldType}}</span>
-                        {{filter.filterOption.fieldName}}
-                    <div *ngSwitchCase="fieldType.Number">
-                        <num-filter [numberFilter]="filter" (deleteFilter)="deleteFilter($event)"></num-filter>
+            <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid" style="margin: 10px 0px">
+                <div *ngFor="let filter of filters">
+                    <div class="ui-grid-row">
+                        <div class="ui-grid-col-12">
+                            <div [ngSwitch]="filter.filterOption.fieldType" style="margin: 10px 0px">
+                                <div *ngSwitchCase="fieldType.Number">
+                                    <num-filter [numberFilter]="filter" (deleteFilter)="deleteFilter($event)"></num-filter>
+                                </div>
+                                <div *ngSwitchDefault>...</div>
+                            </div>
+                        </div>
                     </div>
-                    <div *ngSwitchDefault>...</div>
                 </div>
+                <div class="ui-grid-row">
+                    <form [formGroup]="fieldSelectForm" (ngSubmit)="addFilter(fieldSelectForm.value.selectedField)">
+                        <p-dropdown [options]="availableFieldsSelectOptions" placeholder="Select a filter" formControlName="selectedField"></p-dropdown>
+                        <p-button type="submit" styleClass="ui-button-success" [disabled]="availableFieldsSelectOptions.length == 0" label="Add Filter"></p-button>
+                    </form>
+                </div>
+                <div class="ui-grid-row">
+                        <div class="ui-grid-col-6">Assesment Filters</div>
+                        <div class="ui-grid-col-6">
+                            <p-button (onClick)="buildQuery()" label="Build Query"></p-button>
+                        </div>
+                    {{query}}
+                    </div>
             </div>
-            <form [formGroup]="fieldSelectForm" (ngSubmit)="addFilter(fieldSelectForm.value.selectedField)">
-                <p-dropdown [options]="availableFieldsSelectOptions" placeholder="Select a filter" formControlName="selectedField"></p-dropdown>
-                <p-button type="submit" [disabled]="availableFieldsSelectOptions.length == 0" label="Add Filter"></p-button>
-            </form>
         </div>
 </div>

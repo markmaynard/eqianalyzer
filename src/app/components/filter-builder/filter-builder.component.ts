@@ -38,15 +38,21 @@ export class FilterBuilderComponent implements OnInit {
 
     addFilter(filterOption: FilterOption) {
         console.log(filterOption)
-        if (filterOption.fieldType === FieldType.Number) {
-            console.log(`pushing ${filterOption.fieldName}`)
-            this.filters.push(new NumberFilter(filterOption))
-        } else if (filterOption.fieldType === FieldType.Date) {
-            this.filters.push(new DateFilter(filterOption))                
-        }   else if (filterOption.fieldType === FieldType.String) {
-            throw new Error("Not Implemented");
+        if (filterOption) {
+            if (filterOption.fieldType === FieldType.Number) {
+                console.log(`pushing ${filterOption.fieldName}`)
+                this.filters.push(new NumberFilter(filterOption))
+            } else if (filterOption.fieldType === FieldType.Date) {
+                this.filters.push(new DateFilter(filterOption))                
+            }   else if (filterOption.fieldType === FieldType.String) {
+                throw new Error("Not Implemented");
+            }
+            this.updateFilterLists();
+            let field = this.fieldSelectForm.get("selectedField");
+            if (field) {
+                field.setValue(undefined);
+            }
         }
-        this.updateFilterLists();
     }
 
     updateFilterLists() {
@@ -60,7 +66,6 @@ export class FilterBuilderComponent implements OnInit {
 
     onSubmit(value: string) {
         console.log(value);
-        console.log(this.dobValue.getTime()/1000);
         this.submitted = false;
         let firstName = this.personForm.get("firstName");
         let lastName = this.personForm.get("lastName");
