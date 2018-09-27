@@ -18,6 +18,7 @@ export class FilterBuilderComponent implements OnInit {
     availableFields: FilterOption[] = [];
     availableFieldsSelectOptions: {label: string, value: FilterOption}[] = [];
     query: string;
+    queryResults: {}[];
     values: {};
     dobValue: Date;
     people: Person[] = [];
@@ -77,7 +78,7 @@ export class FilterBuilderComponent implements OnInit {
                 this.zone.run(() => {
                     this.people = peeps;
                 })
-                this.assesmentQueryBuilder.personIds = this.people.map(p => p.id);
+                this.assesmentQueryBuilder.subjects = this.people;
             });
         } else if (firstName && lastName && this.dobValue) {
             console.log(this.dobValue.getTimezoneOffset())
@@ -88,7 +89,7 @@ export class FilterBuilderComponent implements OnInit {
                 this.zone.run(() => {
                     this.people = [peep];
                 })
-                this.assesmentQueryBuilder.personIds = this.people.map(p => p.id);
+                this.assesmentQueryBuilder.subjects = this.people;
             });
         }
     }
@@ -106,6 +107,7 @@ export class FilterBuilderComponent implements OnInit {
         TheDb.selectAll(this.query, {}).subscribe(res => {
             console.log("Results:");
             console.log(res);
+            this.queryResults = res;
             for (let filter of this.filters) {
                 let arr = res.map(r => r[filter.filterOption.fieldName]);
                 console.log(math.std(arr));

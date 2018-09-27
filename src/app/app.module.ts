@@ -15,6 +15,7 @@ import { CardModule } from 'primeng/card';
 import { AppComponent } from './app.component';
 import { FilterBuilderComponent } from './components/filter-builder/filter-builder.component';
 import { NumberFilterComponent } from './components/number-filter/number-filter.component';
+import { QueryResultsComponent } from './components/query-results/query-results.component'
 import { AssesmentQueryBuilder } from './services/assesment-query-builder.service';
 
 @NgModule({
@@ -35,12 +36,14 @@ import { AssesmentQueryBuilder } from './services/assesment-query-builder.servic
     ],
     declarations: [
         AppComponent,
-        FilterBuilderComponent,
-        NumberFilterComponent
+        NumberFilterComponent,
+        QueryResultsComponent,
+        FilterBuilderComponent
     ],
     providers: [
         FilterBuilderComponent,
         NumberFilterComponent,
+        QueryResultsComponent,
         AssesmentQueryBuilder
     ],
     bootstrap: [

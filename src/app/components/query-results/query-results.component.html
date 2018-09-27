@@ -1,0 +1,20 @@
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">Data Field</th>
+            <th scope="col">Average</th>
+            <th scope="col">Median</th>
+            <th scope="col">Mode</th>
+            <th scope="col">Standard Deviation</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let calc of calculations">
+            <td scope="row">{{calc.filterName}}</td>
+            <td scope="row">{{calc.average}}</td>
+            <td scope="row">{{calc.median}}</td>
+            <td scope="row"><span *ngFor="let m of calc.mode">{{m}},</span></td>
+            <td scope="row">{{calc.stdev}}</td>
+        </tr>
+    </tbody>
+</table>

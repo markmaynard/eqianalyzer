@@ -39,9 +39,6 @@
                 <p-button type="submit" [disabled]="!personForm.valid" label="Submit"></p-button>
         </div>
     </form>
-    <div *ngFor="let person of people">
-        {{person.firstName}}
-    </div>
         <div *ngIf="people.length > 0">
             <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid" style="margin: 10px 0px">
                 <div *ngFor="let filter of filters">
@@ -70,5 +67,8 @@
                     {{query}}
                     </div>
             </div>
+        </div>
+        <div id="result">
+            <query-results [filters]="filters" [queryResults]="queryResults"></query-results>
         </div>
 </div>

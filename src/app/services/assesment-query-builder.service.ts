@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { isNumber } from 'util';
+import { Person } from '../entity/person.entity';
 
 @Injectable({
     providedIn: 'root'
@@ -36,7 +37,7 @@ export class AssesmentQueryBuilder {
 
     public filters: IFilter[] = [];
 
-    public personIds: number[] = [];
+    public subjects: Person[] = [];
 
     constructor() {}
 
@@ -70,7 +71,8 @@ export class AssesmentQueryBuilder {
         query = query.slice(0, -2);
         query = query + ' FROM assesment';
         query = query + ' WHERE ';
-        if(this.personIds.length > 0) {
+        let personIds = this.subjects.map(p => p.id);
+        if(personIds.length > 0) {
             query = query + this.getPersonIdsInWhereClause() + ' AND ';
         }
         for(let filter of this.filters) {
@@ -81,6 +83,15 @@ export class AssesmentQueryBuilder {
         query = query.slice(0, -4);
 
         return query;
+    }
+
+    getFilterCriteriaReport(): string[] {
+        let report: string[] = [];
+
+        for(let subject of this.subjects) {
+            report.push(`Subject: ${subject.firstName}, ${subject.lastName} : ${subject.dateOfBirth} `);
+        }
+        return report
     }
 
     getFilterValues(): {} {
@@ -102,8 +113,10 @@ export class AssesmentQueryBuilder {
     }
 
     getPersonIdsInWhereClause(): String {
-        let clause = "personId in ("
-        for(let id of this.personIds) {
+        let clause = "personId in (";
+        let personIds = this.subjects.map(p => p.id);
+
+        for(let id of personIds) {
             clause = clause + `${id},`;
         }
         clause = clause.slice(0,-1);
