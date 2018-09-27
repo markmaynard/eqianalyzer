@@ -1,6 +1,8 @@
 import { Component, OnInit, NgZone } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 
+import * as math from 'mathjs';
+
 import { NumberFilter, AssesmentQueryBuilder, FilterOption, IFilter, FieldType, DateFilter } from '../../services/assesment-query-builder.service';
 import { Person } from '../../entity/person.entity';
 import { MessageService } from 'primeng/api';
@@ -104,6 +106,11 @@ export class FilterBuilderComponent implements OnInit {
         TheDb.selectAll(this.query, {}).subscribe(res => {
             console.log("Results:");
             console.log(res);
+            for (let filter of this.filters) {
+                let arr = res.map(r => r[filter.filterOption.fieldName]);
+                console.log(math.std(arr));
+                console.log(`${filter.filterOption.fieldName} ${math.std(arr)} ${math.median(arr)} ${math.mean(arr)} ${math.mode(arr)}`);
+            }
         });
     }
 }
