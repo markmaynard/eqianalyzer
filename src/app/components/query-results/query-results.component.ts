@@ -25,7 +25,9 @@ export class QueryResultsComponent implements OnInit, OnChanges{
         stdev: number
     }[] = [];
 
-    constructor( private cdRef: ChangeDetectorRef
+    constructor(
+        private cdRef: ChangeDetectorRef,
+        private zone: NgZone
     ) {
     }
 
@@ -39,21 +41,23 @@ export class QueryResultsComponent implements OnInit, OnChanges{
     runCalculations() {
         console.log('runCalculations');
         let res = this.queryResults;
-        for (let filter of this.filters) {
-            let arr = res.map(r => r[filter.filterOption.fieldName]);
-            this.calculations.push(
-                {
-                    filterName: filter.filterOption.fieldName,
-                    stdev: math.std(arr),
-                    average: math.mean(arr),
-                    median: math.median(arr),
-                    mode: math.mode(arr),
-                }
-            );
-            //console.log(math.std(arr));
-            console.log(`${filter.filterOption.fieldName} ${math.std(arr)} ${math.median(arr)} ${math.mean(arr)} ${math.mode(arr)}`);
-        }
-        this.cdRef.detectChanges();
+        this.zone.run( () => {
+            for (let filter of this.filters) {
+                let arr = res.map(r => r[filter.filterOption.fieldName]);
+                this.calculations.push(
+                    {
+                        filterName: filter.filterOption.fieldName,
+                        stdev: math.std(arr),
+                        average: math.mean(arr),
+                        median: math.median(arr),
+                        mode: math.mode(arr),
+                    }
+                );
+                //console.log(math.std(arr));
+                console.log(`${filter.filterOption.fieldName} ${math.std(arr)} ${math.median(arr)} ${math.mean(arr)} ${math.mode(arr)}`);
+            }
+            this.cdRef.detectChanges();
+        });
     }
 
 }

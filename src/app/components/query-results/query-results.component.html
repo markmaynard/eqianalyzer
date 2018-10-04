@@ -13,7 +13,7 @@
             <td scope="row">{{calc.filterName}}</td>
             <td scope="row">{{calc.average}}</td>
             <td scope="row">{{calc.median}}</td>
-            <td scope="row"><span *ngFor="let m of calc.mode">{{m}},</span></td>
+            <td scope="row"><span *ngFor="let m of calc.mode; last as isLast"><span *ngIf="!isLast">{{m}},</span><span *ngIf="isLast">{{m}}</span></span></td>
             <td scope="row">{{calc.stdev}}</td>
         </tr>
     </tbody>

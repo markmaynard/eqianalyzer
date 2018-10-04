@@ -190,23 +190,65 @@ export class Person {
 
     public static fromCSVImportRow(data: object): Observable<Person> {
         let row = data[0];
-        let firstName = row['firstName'];
-        let lastName = row['lastName'];
-        console.log(row['dateOfBirth']);
-        let dateOfBirth =new Date(row['dateOfBirth']);
-        let clergyStatus = (<string>row['clergyStatus']) as ClergyStatus;
-        let district = row['district'];
-        return Person.getByFirstNameLastNameAndDOB(row['firstName'], row['lastName'], new Date(row['dateOfBirth']))
-            .pipe(
-                catchError(error => {
-                    let p: Person = new Person();
-                    p.firstName = firstName;
-                    p.lastName = lastName;
-                    p.dateOfBirth = dateOfBirth;
-                    p.clergyStatus = clergyStatus;
-                    p.district = district;
-                    return p.insert().pipe( map(r => p));
-                })
-            )
+        let personImportError = new PersonImportError();
+        try {
+            let firstName = this.processField(row['firstName'],'firstName',personImportError);
+            let lastName = this.processField(row['lastName'],'lastName',personImportError);
+            console.log(row['dateOfBirth']);
+            let dateOfBirth: Date;
+            if ( row.data[0]['dateOfBirth'] ) {
+                try{
+                    dateOfBirth = new Date(row.data[0]['dateOfBirth']);
+                } catch (e) {
+                    personImportError.errorMsgs.push(`Error processing field: dateOfBirth - ${e}`);
+                }
+            } else {
+                personImportError.errorMsgs.push('Error missing field: dateOfBirth');
+            }
+            let clergyStatus: ClergyStatus;
+            try {
+                if (row['clergyStatus']) {
+                    clergyStatus = (<string>row['clergyStatus']) as ClergyStatus;
+                } else {
+                    personImportError.errorMsgs.push('Error missing field: clergyStatus');                    
+                }
+            } catch (e) {
+                personImportError.errorMsgs.push('Error processing field: clergyStatus');                    
+            }
+            let district = this.processField(row['district'],'district',personImportError);
+            return Person.getByFirstNameLastNameAndDOB(row['firstName'], row['lastName'], row.data[0]['dateOfBirth'])
+                .pipe(
+                    catchError(error => {
+                        let p: Person = new Person();
+                        p.firstName = firstName;
+                        p.lastName = lastName;
+                        p.dateOfBirth = dateOfBirth;
+                        p.clergyStatus = clergyStatus;
+                        p.district = district;
+                        return p.insert().pipe( map(r => p));
+                    })
+                )
+            } catch (e) {
+                console.log(e);
+                throw personImportError
+            }
     }
+
+    private static processField(field: number, fieldName: string, assementImportError: PersonImportError): any {
+        if ( field ) {
+            try{
+                return field;
+            } catch (e) {
+                assementImportError.errorMsgs.push(`Error processing field: ${fieldName} - ${e}`);
+            }
+        } else {
+            assementImportError.errorMsgs.push(`Error missing field: ${fieldName}`);
+        }
+        throw(new Error(`Import failed: ${fieldName}`));
+    }
+}
+
+
+export class PersonImportError {
+    errorMsgs: string[] = [];
 }

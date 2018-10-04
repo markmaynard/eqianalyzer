@@ -19,6 +19,7 @@ import { readFileSync } from 'fs';
 
 import { map, flatMap, catchError } from 'rxjs/operators';
 import {MenuItem} from 'primeng/api';
+import { Observable } from 'rxjs';
 
 @Component({
     selector: 'app',
@@ -27,6 +28,13 @@ import {MenuItem} from 'primeng/api';
 export class AppComponent implements OnInit{
     public people: Person[];
     public menuItems: MenuItem[];
+    public importStatus: {
+        errors: { error:string, row:number }[],
+        succeeded: number,
+        failed: number,
+        totalRows: number
+    };
+    public showImportPopup: boolean = false;
 
     constructor(
         private dbService : DbService,
@@ -129,12 +137,47 @@ export class AppComponent implements OnInit{
             );
     }
 
-    public onRestoreDb() {
-        /*TheDb.importJson(path.join(Settings.dbFolder, 'database.init.json'), false)
-            .then(() => {
-                this.getPeople();
-            });*/
-        this.getPeople();
+    public onSwitchDb() {
+        let filename: string;
+        const options: OpenDialogOptions = {
+            title: 'Open or Create database file',
+            defaultPath: remote.app.getPath('documents'),
+            properties: [
+                'promptToCreate',
+                'openFile'
+            ],
+            filters: [
+                {
+                    name: 'Database',
+                    extensions: ['db'],
+                },
+            ],
+        };
+        filename = remote.dialog.showOpenDialog(remote.getCurrentWindow(), options)[0];
+
+        if (!filename) {
+            return;
+        }
+
+        TheDb.createDb(filename)
+            .pipe(
+                map((dbPath) => {
+                    console.log('app1');
+                    if (!Settings.hasFixedDbLocation) {
+                        Settings.dbPath = dbPath;
+                        Settings.write();
+                    }
+                }),
+                map(() => {
+                    console.log('Database opened, getting people');
+                    this.getPeople();
+                })
+            ).subscribe(
+                () => { console.log('DB created')},
+                (reason) => {
+                    console.log(reason);
+                }
+            );
     }
 
     public getPeople() {
@@ -195,30 +238,71 @@ export class AppComponent implements OnInit{
 
         const file = readFileSync(filenames[0], 'utf8');
         let rowIndex = 1;
-        let errors: string[]= [];
+        let errors: { error:string, row:number }[]= [];
+        let failed = 0;
         parse(file, {
             header: true,
             dynamicTyping: true,
             step: (row) => {
               console.log("Row:", row.data);
-              Person.fromCSVImportRow(row.data)
-                .pipe(
-                    flatMap((p: Person) => {
-                        return Assesment.fromCSVImportRow(row, p.id);
-                    })
-                ).subscribe(
-                    ()=>{
-                        this.getPeople();
-                    },
-                    (err: Error) => { 
-                        errors.push(`Error:(${rowIndex}: Import failed: ${err.message} `);
-                    }
-                )
-                rowIndex++;
+              try {
+                Person.fromCSVImportRow(row.data)
+                    .pipe(
+                        flatMap((p: Person) => {
+                            let assesment: Observable<Assesment>;
+                            try {
+                                assesment = Assesment.fromCSVImportRow(row, p.id);
+                                return assesment;
+                            } catch (e) {
+                                failed = failed + 1;
+                                if (e.errorMsgs) {
+                                    errors = [...errors, ...e.errorMsgs.map( (e: string) => {
+                                        return {error: e, row: rowIndex}
+                                    })];
+                                } else {
+                                    errors.push(e.message)
+                                }
+                            }
+                            throw new Error(`Failed to import assesment row: ${row}`)
+                        })
+                    ).subscribe(
+                        ()=>{
+                            this.getPeople();
+                        },
+                        (err: Error) => { 
+                            errors.push({
+                                error: `Error:(${rowIndex}): Import failed: ${err.message}`,
+                                row: rowIndex
+                            });
+                        }
+                    )
+                    rowIndex++;
+            } catch (e) {
+                failed = failed + 1;
+                if (e.errorMsgs) {
+                    errors = [...errors, ...e.errorMsgs.map( (e: string) => {
+                        return {error: e, row: rowIndex}
+                    })];
+                } else {
+                    errors.push({
+                        error: `Error:(${rowIndex}): Import failed: ${e.message}`,
+                        row: rowIndex
+                    });
+                }
+            }
             },
             complete: () => {
               console.log("All done!");
-              //setTimeout(this.getPeople(), 3000);
+              if (errors.length > 0) {
+                  console.log(errors);
+                  this.importStatus = {
+                      errors,
+                      failed,
+                      totalRows: rowIndex,
+                      succeeded: rowIndex - failed
+                  };
+              }
+              this.showImportPopup = true;
             }
           });
 

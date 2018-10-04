@@ -381,36 +381,68 @@ export class Assesment {
 
     public static fromCSVImportRow(row: ParseResult, personId: Number): Observable<Assesment> {
         let assesment: Assesment = new Assesment();
+        let assementImportError = new AssementImportError();
         assesment.personId = personId;
-        assesment.date = new Date(row.data[0]['date']);
-        assesment.inconsistencyIndex = row.data[0]['inconsistencyIndex'];
-        assesment.positiveImpression = row.data[0]['positiveImpression'];
-        assesment.negativeImpression = row.data[0]['negativeImpression'];
-        assesment.item133Response = row.data[0]['item133Response'];
-        assesment.totalEmotionalIntelligence = row.data[0]['totalEmotionalIntelligence'];
-        assesment.selfPerceptionComposite = row.data[0]['selfPerceptionComposite'];
-        assesment.selfRegard = row.data[0]['selfRegard'];
-        assesment.selfActualization = row.data[0]['selfActualization'];
-        assesment.emotionalSelfAwareness = row.data[0]['emotionalSelfAwareness'];
-        assesment.selfExpressionComposite = row.data[0]['selfExpressionComposite'];
-        assesment.emotionalExpression = row.data[0]['emotionalExpression'];
-        assesment.assertiveness = row.data[0]['assertiveness'];
-        assesment.independence = row.data[0]['independence'];
-        assesment.interpersonalComposite = row.data[0]['interpersonalComposite'];
-        assesment.interpersonalRelationships = row.data[0]['interpersonalRelationships'];
-        assesment.empathy = row.data[0]['empathy'];
-        assesment.socialResponsibility = row.data[0]['socialResponsibility'];
-        assesment.decisionMakingComposite = row.data[0]['decisionMakingComposite'];
-        assesment.problemSolving = row.data[0]['problemSolving'];
-        assesment.realityTesting = row.data[0]['realityTesting'];
-        assesment.impulseControl = row.data[0]['impulseControl'];
-        assesment.stressManagementComposite = row.data[0]['stressManagementComposite'];
-        assesment.flexibility = row.data[0]['flexibility'];
-        assesment.stressTolerance = row.data[0]['stressTolerance'];
-        assesment.optimismWellBeingIndicator = row.data[0]['optimismWellBeingIndicator'];
+        try {
+            if ( row.data[0]['date'] ) {
+                try{
+                    assesment.date = new Date(row.data[0]['date']);
+                } catch (e) {
+                    assementImportError.errorMsgs.push(`Error processing field: date - ${e}`);
+                }
+            } else {
+                assementImportError.errorMsgs.push('Error missing field: date');
+            }
+            
+            assesment.inconsistencyIndex = this.processNumField(row.data[0]['inconsistencyIndex'],'inconsistencyIndex',assementImportError);
+            assesment.positiveImpression = this.processNumField(row.data[0]['positiveImpression'],'positiveImpression',assementImportError);
+            assesment.negativeImpression = this.processNumField(row.data[0]['negativeImpression'],'negativeImpression',assementImportError);
+            assesment.item133Response = this.processNumField(row.data[0]['item133Response'],'item133Response',assementImportError);
+            assesment.totalEmotionalIntelligence = this.processNumField(row.data[0]['totalEmotionalIntelligence'],'totalEmotionalIntelligence',assementImportError);
+            assesment.selfPerceptionComposite = this.processNumField(row.data[0]['selfPerceptionComposite'],'selfPerceptionComposite',assementImportError);
+            assesment.selfRegard = this.processNumField(row.data[0]['selfRegard'],'selfRegard',assementImportError);
+            assesment.selfActualization = this.processNumField(row.data[0]['selfActualization'],'selfActualization',assementImportError);
+            assesment.emotionalSelfAwareness = this.processNumField(row.data[0]['emotionalSelfAwareness'],'emotionalSelfAwareness',assementImportError);
+            assesment.selfExpressionComposite = this.processNumField(row.data[0]['selfExpressionComposite'],'selfExpressionComposite',assementImportError);
+            assesment.emotionalExpression = this.processNumField(row.data[0]['emotionalExpression'],'emotionalExpression',assementImportError);
+            assesment.assertiveness = this.processNumField(row.data[0]['assertiveness'],'assertiveness',assementImportError);
+            assesment.independence = this.processNumField(row.data[0]['independence'],'independence',assementImportError);
+            assesment.interpersonalComposite = this.processNumField(row.data[0]['interpersonalComposite'],'interpersonalComposite',assementImportError);
+            assesment.interpersonalRelationships = this.processNumField(row.data[0]['interpersonalRelationships'],'interpersonalRelationships',assementImportError);
+            assesment.empathy = this.processNumField(row.data[0]['empathy'],'empathy',assementImportError);
+            assesment.socialResponsibility = this.processNumField(row.data[0]['socialResponsibility'],'socialResponsibility',assementImportError);
+            assesment.decisionMakingComposite = this.processNumField(row.data[0]['decisionMakingComposite'],'decisionMakingComposite',assementImportError);
+            assesment.problemSolving = this.processNumField(row.data[0]['problemSolving'],'problemSolving',assementImportError);
+            assesment.realityTesting = this.processNumField(row.data[0]['realityTesting'],'realityTesting',assementImportError);
+            assesment.impulseControl = this.processNumField(row.data[0]['impulseControl'],'impulseControl',assementImportError);
+            assesment.stressManagementComposite = this.processNumField(row.data[0]['stressManagementComposite'],'stressManagementComposite',assementImportError);
+            assesment.flexibility = this.processNumField(row.data[0]['flexibility'],'flexibility',assementImportError);
+            assesment.stressTolerance = this.processNumField(row.data[0]['stressTolerance'],'stressTolerance',assementImportError);;
+            assesment.optimismWellBeingIndicator = this.processNumField(row.data[0]['optimismWellBeingIndicator'],'optimismWellBeingIndicator',assementImportError);
+        } catch (e) {
+            console.log(e);
+            throw assementImportError;
+        }
         console.log('Assesment:');
         console.log(assesment);
         return assesment.insert().pipe(map(()=>assesment));
     }
+
+    private static processNumField(field: number, fieldName: string, assementImportError: AssementImportError): number {
+        if ( field ) {
+            try{
+                return field;
+            } catch (e) {
+                assementImportError.errorMsgs.push(`Error processing field: ${fieldName} - ${e}`);
+            }
+        } else {
+            assementImportError.errorMsgs.push(`Error missing field: ${fieldName}`);
+        }
+        throw(new Error(`Import failed: ${fieldName}`));
+    }
     
+}
+
+export class AssementImportError {
+    errorMsgs: string[] = [];
 }

@@ -11,6 +11,7 @@ import { TabViewModule } from 'primeng/tabview';
 import { DropdownModule } from 'primeng/dropdown';
 import { CalendarModule } from 'primeng/calendar';
 import { CardModule } from 'primeng/card';
+import { DialogModule } from 'primeng/dialog';
 
 import { AppComponent } from './app.component';
 import { FilterBuilderComponent } from './components/filter-builder/filter-builder.component';
@@ -30,6 +31,7 @@ import { AssesmentQueryBuilder } from './services/assesment-query-builder.servic
         DropdownModule,
         CalendarModule,
         CardModule,
+        DialogModule,
         RouterModule,
         FormsModule,
         ReactiveFormsModule

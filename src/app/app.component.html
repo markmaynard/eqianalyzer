@@ -4,7 +4,7 @@
                 <div class="container">
                 <div class="row">
                         <div class="col">
-                            <button class="btn btn-outline-primary" (click)="onRestoreDb()">Restore Db</button>
+                            <button class="btn btn-outline-primary" (click)="onSwitchDb()">Switch Db</button>
                         </div>
                     </div>
                     <div class="row">
@@ -13,6 +13,18 @@
                         </div>
                     </div>
                     </div>
+                    <p-dialog header="Import Results" [(visible)]="showImportPopup">
+                        <div *ngIf="importStatus">
+                            <div>Total rows: {{importStatus.totalRows}}</div>
+                            <div>Succeeded: {{importStatus.succeeded}}</div>
+                            <div>Failed {{importStatus.failed}}</div>
+                            <div>Errors:
+                                <div *ngFor="let e of importStatus.errors">
+                                    {{e.row}}:{{e.error}}
+                                </div>
+                            </div>
+                        </div>
+                    </p-dialog>
         </p-tabPanel>
         <p-tabPanel header="View People">
                 <div class="container">
