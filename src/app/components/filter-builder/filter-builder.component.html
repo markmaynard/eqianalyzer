@@ -72,3 +72,7 @@
             <query-results [filters]="filters" [queryResults]="queryResults"></query-results>
         </div>
 </div>
+
+<p-dialog header="Select a subject" [(visible)]="showSubjectSelect">
+        <subject-select-prompt [subjects]="people" (personSelected)="onPersonSelected($event)" ></subject-select-prompt>
+</p-dialog>

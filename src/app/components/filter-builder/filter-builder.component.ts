@@ -23,6 +23,7 @@ export class FilterBuilderComponent implements OnInit {
     dobValue: Date;
     people: Person[] = [];
     submitted: boolean = false;
+    showSubjectSelect: boolean = false;
     personForm = new FormGroup({
         firstName: new FormControl('', Validators.required),
         lastName: new FormControl('', Validators.required)
@@ -74,11 +75,17 @@ export class FilterBuilderComponent implements OnInit {
         let lastName = this.personForm.get("lastName");
         if (firstName && lastName && !this.dobValue) {
             Person.getByFirstNameLastName(firstName.value, lastName.value).subscribe( (peeps: Person[]) => {
+                if (peeps.length > 1) {
+                    this.zone.run(() => {
+                        this.people = peeps;
+                        this.showSubjectSelect=true;
+                    })
+                }/*
                 console.log(peeps);
                 this.zone.run(() => {
                     this.people = peeps;
                 })
-                this.assesmentQueryBuilder.subjects = this.people;
+                this.assesmentQueryBuilder.subjects = this.people;*/
             });
         } else if (firstName && lastName && this.dobValue) {
             console.log(this.dobValue.getTimezoneOffset())
@@ -92,6 +99,13 @@ export class FilterBuilderComponent implements OnInit {
                 this.assesmentQueryBuilder.subjects = this.people;
             });
         }
+    }
+
+    onPersonSelected(person: Person) {
+        this.zone.run(() => {
+            this.people = [person];
+        })
+        this.assesmentQueryBuilder.subjects = this.people;
     }
 
     deleteFilter(event: any) {
