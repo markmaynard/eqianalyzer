@@ -33,7 +33,8 @@ export class Assesment {
     stressManagementComposite: Number;
     flexibility: Number;
     stressTolerance: Number;
-    optimismWellBeingIndicator: Number;
+    optimism: Number
+    wellBeingIndicator: Number;
 
     public static get(id: number): Observable<Assesment> {
         const sql = 'SELECT * FROM assesment WHERE id = $id';
@@ -156,7 +157,8 @@ export class Assesment {
                 stressManagementComposite,
                 flexibility,
                 stressTolerance,
-                optimismWellBeingIndicator)
+                optimism,
+                wellBeingIndicator)
             VALUES(
                 $date,
                 $personId,
@@ -184,7 +186,8 @@ export class Assesment {
                 $stressManagementComposite,
                 $flexibility,
                 $stressTolerance,
-                $optimismWellBeingIndicator
+                $optimism,
+                $wellBeingIndicator
             )`;
 
         const values = {
@@ -214,7 +217,8 @@ export class Assesment {
             $stressManagementComposite: this.stressManagementComposite,
             $flexibility: this.flexibility,
             $stressTolerance: this.stressTolerance,
-            $optimismWellBeingIndicator: this.optimismWellBeingIndicator
+            $optimism: this.optimism,
+            $wellBeingIndicator: this.wellBeingIndicator
         };
 
         return TheDb.insert(sql, values)
@@ -258,7 +262,8 @@ export class Assesment {
                 SET stressManagementComposite = $stressManagementComposite
                 SET flexibility = $flexibility
                 SET stressTolerance = $stressTolerance
-                SET optimismWellBeingIndicator = $optimismWellBeingIndicator)
+                SET optimism = $optimism
+                SET wellBeingIndicator = $wellBeingIndicator)
             VALUES(
                 $date,
                 $personId,
@@ -286,7 +291,8 @@ export class Assesment {
                 $stressManagementComposite,
                 $flexibility,
                 $stressTolerance,
-                $optimismWellBeingIndicator
+                $optimism,
+                $wellBeingIndicator
             )`;
 
         const values = {
@@ -316,7 +322,8 @@ export class Assesment {
             $stressManagementComposite: this.stressManagementComposite,
             $flexibility: this.flexibility,
             $stressTolerance: this.stressTolerance,
-            $optimismWellBeingIndicator: this.optimismWellBeingIndicator
+            $optimism: this.optimism,
+            $wellBeingIndicator: this.wellBeingIndicator
         };
 
         return TheDb.update(sql, values)
@@ -375,7 +382,8 @@ export class Assesment {
         this.stressManagementComposite = row['stressManagementComposite'];
         this.flexibility = row['flexibility'];
         this.stressTolerance = row['stressTolerance'];
-        this.optimismWellBeingIndicator = row['optimismWellBeingIndicator'];
+        this.optimism = row['optimism'];
+        this.wellBeingIndicator = row['wellBeingIndicator'];
         return this;
     }
 
@@ -384,41 +392,42 @@ export class Assesment {
         let assementImportError = new AssementImportError();
         assesment.personId = personId;
         try {
-            if ( row.data[0]['date'] ) {
+            if ( row.data[0]['Date Assessed'] ) {
                 try{
-                    assesment.date = new Date(row.data[0]['date']);
+                    assesment.date = new Date(row.data[0]['Date Assessed']);
                 } catch (e) {
-                    assementImportError.errorMsgs.push(`Error processing field: date - ${e}`);
+                    assementImportError.errorMsgs.push(`Error processing field: Date Assessed - ${e}`);
                 }
             } else {
-                assementImportError.errorMsgs.push('Error missing field: date');
+                assementImportError.errorMsgs.push('Error missing field: Date Assessed');
             }
             
-            assesment.inconsistencyIndex = this.processNumField(row.data[0]['inconsistencyIndex'],'inconsistencyIndex',assementImportError);
-            assesment.positiveImpression = this.processNumField(row.data[0]['positiveImpression'],'positiveImpression',assementImportError);
-            assesment.negativeImpression = this.processNumField(row.data[0]['negativeImpression'],'negativeImpression',assementImportError);
-            assesment.item133Response = this.processNumField(row.data[0]['item133Response'],'item133Response',assementImportError);
-            assesment.totalEmotionalIntelligence = this.processNumField(row.data[0]['totalEmotionalIntelligence'],'totalEmotionalIntelligence',assementImportError);
-            assesment.selfPerceptionComposite = this.processNumField(row.data[0]['selfPerceptionComposite'],'selfPerceptionComposite',assementImportError);
-            assesment.selfRegard = this.processNumField(row.data[0]['selfRegard'],'selfRegard',assementImportError);
-            assesment.selfActualization = this.processNumField(row.data[0]['selfActualization'],'selfActualization',assementImportError);
-            assesment.emotionalSelfAwareness = this.processNumField(row.data[0]['emotionalSelfAwareness'],'emotionalSelfAwareness',assementImportError);
-            assesment.selfExpressionComposite = this.processNumField(row.data[0]['selfExpressionComposite'],'selfExpressionComposite',assementImportError);
-            assesment.emotionalExpression = this.processNumField(row.data[0]['emotionalExpression'],'emotionalExpression',assementImportError);
-            assesment.assertiveness = this.processNumField(row.data[0]['assertiveness'],'assertiveness',assementImportError);
-            assesment.independence = this.processNumField(row.data[0]['independence'],'independence',assementImportError);
-            assesment.interpersonalComposite = this.processNumField(row.data[0]['interpersonalComposite'],'interpersonalComposite',assementImportError);
-            assesment.interpersonalRelationships = this.processNumField(row.data[0]['interpersonalRelationships'],'interpersonalRelationships',assementImportError);
-            assesment.empathy = this.processNumField(row.data[0]['empathy'],'empathy',assementImportError);
-            assesment.socialResponsibility = this.processNumField(row.data[0]['socialResponsibility'],'socialResponsibility',assementImportError);
-            assesment.decisionMakingComposite = this.processNumField(row.data[0]['decisionMakingComposite'],'decisionMakingComposite',assementImportError);
-            assesment.problemSolving = this.processNumField(row.data[0]['problemSolving'],'problemSolving',assementImportError);
-            assesment.realityTesting = this.processNumField(row.data[0]['realityTesting'],'realityTesting',assementImportError);
-            assesment.impulseControl = this.processNumField(row.data[0]['impulseControl'],'impulseControl',assementImportError);
-            assesment.stressManagementComposite = this.processNumField(row.data[0]['stressManagementComposite'],'stressManagementComposite',assementImportError);
-            assesment.flexibility = this.processNumField(row.data[0]['flexibility'],'flexibility',assementImportError);
-            assesment.stressTolerance = this.processNumField(row.data[0]['stressTolerance'],'stressTolerance',assementImportError);;
-            assesment.optimismWellBeingIndicator = this.processNumField(row.data[0]['optimismWellBeingIndicator'],'optimismWellBeingIndicator',assementImportError);
+            assesment.inconsistencyIndex = this.processNumField(row.data[0]['Incosis'],'Incosis',assementImportError);
+            assesment.positiveImpression = this.processNumField(row.data[0]['Positive'],'Positive',assementImportError);
+            assesment.negativeImpression = this.processNumField(row.data[0]['Negative'],'Negative',assementImportError);
+            assesment.item133Response = this.processNumField(row.data[0]['Item 133'],'Item 133',assementImportError);
+            assesment.totalEmotionalIntelligence = this.processNumField(row.data[0]['Total EI'],'Total EI',assementImportError);
+            assesment.selfPerceptionComposite = this.processNumField(row.data[0]['SP Comp'],'SP Comp',assementImportError);
+            assesment.selfRegard = this.processNumField(row.data[0]['SR'],'SR',assementImportError);
+            assesment.selfActualization = this.processNumField(row.data[0]['SA'],'SA',assementImportError);
+            assesment.emotionalSelfAwareness = this.processNumField(row.data[0]['ESA'],'ESA',assementImportError);
+            assesment.selfExpressionComposite = this.processNumField(row.data[0]['SE Comp'],'SE Comp',assementImportError);
+            assesment.emotionalExpression = this.processNumField(row.data[0]['EE'],'EE',assementImportError);
+            assesment.assertiveness = this.processNumField(row.data[0]['A'],'A',assementImportError);
+            assesment.independence = this.processNumField(row.data[0]['I'],'I',assementImportError);
+            assesment.interpersonalComposite = this.processNumField(row.data[0]['IN Comp'],'IN Comp',assementImportError);
+            assesment.interpersonalRelationships = this.processNumField(row.data[0]['IR'],'IR',assementImportError);
+            assesment.empathy = this.processNumField(row.data[0]['E'],'E',assementImportError);
+            assesment.socialResponsibility = this.processNumField(row.data[0]['SocRes'],'SocRes',assementImportError);
+            assesment.decisionMakingComposite = this.processNumField(row.data[0]['DM Comp'],'DM Comp',assementImportError);
+            assesment.problemSolving = this.processNumField(row.data[0]['PS'],'PS',assementImportError);
+            assesment.realityTesting = this.processNumField(row.data[0]['RT'],'RT',assementImportError);
+            assesment.impulseControl = this.processNumField(row.data[0]['IC'],'IC',assementImportError);
+            assesment.stressManagementComposite = this.processNumField(row.data[0]['SM Comp'],'SM Comp',assementImportError);
+            assesment.flexibility = this.processNumField(row.data[0]['F'],'F',assementImportError);
+            assesment.stressTolerance = this.processNumField(row.data[0]['ST'],'ST',assementImportError);;
+            assesment.optimism = this.processNumField(row.data[0]['O'],'O',assementImportError);
+            assesment.wellBeingIndicator = this.processNumField(row.data[0]['WellBeing'],'WellBeing',assementImportError);
         } catch (e) {
             console.log(e);
             throw assementImportError;

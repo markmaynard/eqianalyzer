@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS `person` (
 	`dateOfBirth`	DATETIME,
 	`clergyStatus`	TEXT NOT NULL,
 	`district`	TEXT NOT NULL,
+    `gender` TEXT NOT NULL,
 	PRIMARY KEY(`id`),
 	CONSTRAINT `unique_person` UNIQUE ('firstName', 'lastName', 'dateOfBirth')
 );
@@ -40,7 +41,8 @@ CREATE TABLE IF NOT EXISTS `assesment` (
     `stressManagementComposite`  INTEGER,
     `flexibility`  INTEGER,
     `stressTolerance`  INTEGER,
-    `optimismWellBeingIndicator`  INTEGER,
+    `optimism` INTEGER,
+    `wellBeingIndicator`  INTEGER,
 	PRIMARY KEY(`id`),
 	FOREIGN KEY(`personId`) REFERENCES person(`id`)
 );

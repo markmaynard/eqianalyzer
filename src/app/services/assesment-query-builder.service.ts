@@ -32,7 +32,8 @@ export class AssesmentQueryBuilder {
     {fieldName: "stressManagementComposite", fieldType: FieldType.Number},
     {fieldName: "flexibility", fieldType: FieldType.Number},
     {fieldName: "stressTolerance", fieldType: FieldType.Number},
-    {fieldName: "optimismWellBeingIndicator", fieldType: FieldType.Number}
+    {fieldName: "optimism", fieldType: FieldType.Number},
+    {fieldName: "wellBeingIndicator", fieldType: FieldType.Number}
     ];
 
     public filters: IFilter[] = [];

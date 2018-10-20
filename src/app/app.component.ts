@@ -276,7 +276,6 @@ export class AppComponent implements OnInit{
                             });
                         }
                     )
-                    rowIndex++;
             } catch (e) {
                 failed = failed + 1;
                 if (e.errorMsgs) {
@@ -289,19 +288,21 @@ export class AppComponent implements OnInit{
                         row: rowIndex
                     });
                 }
+            } finally {
+                rowIndex++;
             }
             },
             complete: () => {
               console.log("All done!");
               if (errors.length > 0) {
                   console.log(errors);
-                  this.importStatus = {
-                      errors,
-                      failed,
-                      totalRows: rowIndex,
-                      succeeded: rowIndex - failed
-                  };
               }
+              this.importStatus = {
+                errors,
+                failed,
+                totalRows: rowIndex,
+                succeeded: rowIndex - failed
+              };
               this.showImportPopup = true;
             }
           });

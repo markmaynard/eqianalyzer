@@ -12,5 +12,6 @@ export enum ClergyStatus {
     Retired_Provisional_Elder = 'Retired Provisional Elder',
     Retired_Provisional_Deacon = 'Retired Provisional Deacon',
     Retired_Full_Time_Local_Pastor = 'Retired Full-Time Local Pastor',
+    Retired_Part_Time_Local_Pastor = 'Retired Part-Time Local Pastor',
     Retired_Associate_Member = 'Retired Associate Member'
 }
