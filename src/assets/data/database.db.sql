@@ -2,14 +2,13 @@ BEGIN TRANSACTION;
 --DROP TABLE IF EXISTS `person`;
 CREATE TABLE IF NOT EXISTS `person` (
 	`id`	INTEGER NOT NULL,
-	`firstName`	TEXT NOT NULL,
-	`lastName`	TEXT NOT NULL,
+	`name`	TEXT NOT NULL,
 	`dateOfBirth`	DATETIME,
 	`clergyStatus`	TEXT NOT NULL,
 	`district`	TEXT NOT NULL,
     `gender` TEXT NOT NULL,
 	PRIMARY KEY(`id`),
-	CONSTRAINT `unique_person` UNIQUE ('firstName', 'lastName', 'dateOfBirth')
+	CONSTRAINT `unique_person` UNIQUE ('name', 'dateOfBirth')
 );
 COMMIT;
 BEGIN TRANSACTION;

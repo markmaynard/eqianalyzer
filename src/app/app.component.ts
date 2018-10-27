@@ -35,6 +35,7 @@ export class AppComponent implements OnInit{
         totalRows: number
     };
     public showImportPopup: boolean = false;
+    public settings = Settings;
 
     constructor(
         private dbService : DbService,
@@ -210,7 +211,7 @@ export class AppComponent implements OnInit{
     private initMenu(person: Person): Menu {
         const template: MenuItemConstructorOptions[] = [
             {
-                label: `Delete ${person.firstName},  ${person.lastName}`,
+                label: `Delete ${person.name}`,
                 click: () => this.deleteHero(person),
             },
         ];

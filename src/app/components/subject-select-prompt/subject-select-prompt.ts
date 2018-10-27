@@ -42,7 +42,7 @@ export class SubjectSelectPromptComponent implements OnChanges {
         this.subjectOptions = this.subjects.map( (p: Person, i: number) => {
             let dob = `${p.dateOfBirth.getMonth()}-${p.dateOfBirth.getDate()}-${p.dateOfBirth.getFullYear()}`;
             return {
-                label: `${p.firstName} ${p.lastName} - ${dob}`,
+                label: `${p.name} - ${dob}`,
                 value: i
             }
         })

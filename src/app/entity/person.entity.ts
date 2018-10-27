@@ -8,9 +8,7 @@ export class Person {
 
     id: number;
 
-    firstName: string;
-
-    lastName: string;
+    name: string;
 
     dateOfBirth: Date;
 
@@ -24,8 +22,7 @@ export class Person {
 
     columns: String[] = [
         'id',
-        'firstName',
-        'lastName',
+        'name',
         'dateOfBirth',
         'clergyStatus',
         'district',
@@ -48,11 +45,10 @@ export class Person {
             );
     }
 
-    public static getByFirstNameLastNameAndDOB(firstName: string, lastName: string, dob: Date): Observable<Person> {
-        const sql = 'SELECT * FROM person WHERE firstName = $firstName AND lastName = $lastName AND dateOfBirth = $dateOfBirth';
+    public static getByNameAndDOB(name: string, dob: Date): Observable<Person> {
+        const sql = 'SELECT * FROM person WHERE name = $name AND dateOfBirth = $dateOfBirth';
         const values = { 
-            $firstName: firstName,
-            $lastName:  lastName,
+            $name: name,
             $dateOfBirth: dob.toUTCString()
         };
 
@@ -68,11 +64,10 @@ export class Person {
             );
     }
 
-    public static getByFirstNameLastName(firstName: string, lastName: string): Observable<Person[]> {
-        const sql = 'SELECT * FROM person WHERE firstName = $firstName AND lastName = $lastName';
+    public static getByName(name: string): Observable<Person[]> {
+        const sql = 'SELECT * FROM person WHERE name = $name';
         const values = { 
-            $firstName: firstName,
-            $lastName:  lastName
+            $name: name
         };
 
         return TheDb.selectAll(sql, values)
@@ -86,14 +81,14 @@ export class Person {
                     }
                     return people;
                     } else {
-                        throw new Error('Expected to find 1 Person. Found 0.');
+                        throw new Error('Expected to find N Person(s). Found 0.');
                     }
                 })
             );
     }
 
     public static getAll(): Observable<Person[]> {
-        const sql = `SELECT * FROM person ORDER BY lastName, firstName`;
+        const sql = `SELECT * FROM person ORDER BY name`;
         const values = {};
 
         return TheDb.selectAll(sql, values)
@@ -111,12 +106,11 @@ export class Person {
 
     public insert(): Observable<void> {
         const sql = `
-            INSERT INTO person (firstName, lastName, dateOfBirth, clergyStatus, district, gender)
-            VALUES($firstName, $lastName, $dateOfBirth, $clergyStatus, $district, $gender)`;
+            INSERT INTO person (name, dateOfBirth, clergyStatus, district, gender)
+            VALUES($name, $dateOfBirth, $clergyStatus, $district, $gender)`;
 
         const values = {
-            $firstName: this.firstName,
-            $lastName: this.lastName,
+            $name: this.name,
             $dateOfBirth: this.dateOfBirth.toUTCString(),
             $clergyStatus: this.clergyStatus,
             $district: this.district,
@@ -138,8 +132,7 @@ export class Person {
     public update(): Observable<void> {
         const sql = `
             UPDATE person
-            SET firstName = $firstName
-            SET lastName = $lastName
+            SET name = $name
             SET dateOfBirth = $dateOfBirth
             SET clergyStatus = $clergyStatus
             SET district = $district
@@ -148,8 +141,7 @@ export class Person {
 
         const values = {
             $id: this.id,
-            $firstName: this.firstName,
-            $lastName: this.lastName,
+            $name: this.name,
             $dateOfBirth: this.dateOfBirth,
             $clergyStatus: this.clergyStatus,
             $district: this.district,
@@ -186,8 +178,7 @@ export class Person {
 
     public fromRow(row: object): Person {
         this.id = row['id'];
-        this.firstName = row['firstName'];
-        this.lastName = row['lastName'];
+        this.name = row['name'];
         this.dateOfBirth =new Date(row['dateOfBirth']);
         this.clergyStatus = ClergyStatus[<string>row['clergyStatus']];
         this.district = row['district'];
@@ -199,17 +190,7 @@ export class Person {
         let row = data[0];
         let personImportError = new PersonImportError();
         try {
-            let firstName: string;
-            let lastName: string;
-            if (row['Name']) {
-                let fullName: string = row['Name'];
-                let restOfName: string[];
-                [firstName, ...restOfName] = fullName.split(' ');
-                lastName = restOfName.join(' ');
-            } else {
-                firstName = this.processField(row['firstName'],'firstName',personImportError);
-                lastName = this.processField(row['lastName'],'lastName',personImportError);
-            }
+            let name: string = this.processField(row['Name'],'name',personImportError);
             console.log(row['DoB']);
             let dateOfBirth: Date = new Date();
             if ( row['DoB'] ) {
@@ -298,12 +279,15 @@ export class Person {
             let district = this.processField(row['District'],'District',personImportError);
             let gender = this.processField(row['Gender'],'Gender',personImportError);
             if (undefined !== dateOfBirth) {
-                return Person.getByFirstNameLastNameAndDOB(firstName, lastName, dateOfBirth)
+                return Person.getByNameAndDOB(name, dateOfBirth)
                     .pipe(
+                        map(r => {
+                            let p: Person = new Person().fromRow(r);
+                            return p;
+                        }),
                         catchError(error => {
                             let p: Person = new Person();
-                            p.firstName = firstName;
-                            p.lastName = lastName;
+                            p.name = name;
                             p.dateOfBirth = dateOfBirth;
                             p.clergyStatus = clergyStatus;
                             p.district = district;

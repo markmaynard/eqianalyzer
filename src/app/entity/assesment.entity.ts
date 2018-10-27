@@ -438,7 +438,7 @@ export class Assesment {
     }
 
     private static processNumField(field: number, fieldName: string, assementImportError: AssementImportError): number {
-        if ( field ) {
+        if ( field !== undefined ) {
             try{
                 return field;
             } catch (e) {

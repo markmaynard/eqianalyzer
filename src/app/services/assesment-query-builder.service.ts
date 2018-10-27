@@ -90,7 +90,7 @@ export class AssesmentQueryBuilder {
         let report: string[] = [];
 
         for(let subject of this.subjects) {
-            report.push(`Subject: ${subject.firstName}, ${subject.lastName} : ${subject.dateOfBirth} `);
+            report.push(`Subject: ${subject.name} : ${subject.dateOfBirth} `);
         }
         return report
     }

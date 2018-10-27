@@ -25,8 +25,7 @@ export class FilterBuilderComponent implements OnInit {
     submitted: boolean = false;
     showSubjectSelect: boolean = false;
     personForm = new FormGroup({
-        firstName: new FormControl('', Validators.required),
-        lastName: new FormControl('', Validators.required)
+        name: new FormControl('', Validators.required),
     });
     
     fieldSelectForm = new FormGroup({
@@ -71,27 +70,25 @@ export class FilterBuilderComponent implements OnInit {
     onSubmit(value: string) {
         console.log(value);
         this.submitted = false;
-        let firstName = this.personForm.get("firstName");
-        let lastName = this.personForm.get("lastName");
-        if (firstName && lastName && !this.dobValue) {
-            Person.getByFirstNameLastName(firstName.value, lastName.value).subscribe( (peeps: Person[]) => {
+        let name = this.personForm.get("name");
+        if (name && !this.dobValue) {
+            Person.getByName(name.value).subscribe( (peeps: Person[]) => {
                 if (peeps.length > 1) {
                     this.zone.run(() => {
                         this.people = peeps;
                         this.showSubjectSelect=true;
                     })
-                }/*
-                console.log(peeps);
-                this.zone.run(() => {
-                    this.people = peeps;
-                })
-                this.assesmentQueryBuilder.subjects = this.people;*/
+                } else {
+                    this.zone.run(() => {
+                        this.people = peeps;
+                    })
+                }
             });
-        } else if (firstName && lastName && this.dobValue) {
+        } else if (name && this.dobValue) {
             console.log(this.dobValue.getTimezoneOffset())
             let utcDob = new Date(this.dobValue.getTime() - this.dobValue.getTimezoneOffset()*60000);
             console.log(Math.round(utcDob.getTime() / 1000));
-            Person.getByFirstNameLastNameAndDOB(firstName.value, lastName.value, utcDob).subscribe( (peep: Person) => {
+            Person.getByNameAndDOB(name.value, utcDob).subscribe( (peep: Person) => {
                 console.log(peep);
                 this.zone.run(() => {
                     this.people = [peep];
