@@ -34,7 +34,7 @@ export class SubjectSelectPromptComponent implements OnChanges {
     ngOnChanges(changes: SimpleChanges) {
         if (changes.subjects.currentValue) { 
             this.subjects = changes.subjects.currentValue;
-            this.buildSelect();
+            // this.buildSelect();
         }
       }
 

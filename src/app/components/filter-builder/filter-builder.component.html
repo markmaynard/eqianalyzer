@@ -7,7 +7,7 @@
         <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid" style="margin: 10px 0px">
                 <div class="ui-grid-row">
                     <div class="ui-grid-col-2">
-                        Name *:
+                        Name:
                     </div>
                     <div class="ui-grid-col-6">
                         <input pInputText type="text" formControlName="name" placeholder="Required"/>
@@ -24,7 +24,54 @@
                             <p-calendar [(ngModel)]="dobValue" showButtonBar="true" showIcon="true" [ngModelOptions]="{standalone: true}"></p-calendar>
                         </div>
                 </div>
-        
+
+                <div class="ui-grid-row">
+                        <div class="ui-grid-col-2">
+                            Gender:
+                        </div>
+                        <div class="ui-grid-col-6">
+                            <p-dropdown [options]="genders" formControlName="gender" placeholder></p-dropdown>
+                        </div>
+                        <div class="ui-grid-col-4">
+                            <p-message severity="error" text="Gender is required" *ngIf="!personForm.controls['gender'].valid&&personForm.controls['gender'].dirty"></p-message>
+                        </div>
+                </div>
+                <div class="ui-grid-row">
+                        <div class="ui-grid-col-2">
+                            District:
+                        </div>
+                        <div class="ui-grid-col-6">
+                            <p-dropdown [options]="districts" formControlName="district" placeholder></p-dropdown>
+                        </div>
+                        <div class="ui-grid-col-4">
+                            <p-message severity="error" text="district is required" *ngIf="!personForm.controls['district'].valid&&personForm.controls['district'].dirty"></p-message>
+                        </div>
+                </div>
+                <div class="ui-grid-row">
+                        <div class="ui-grid-col-2">
+                            Clergy Status:
+                        </div>
+                        <div class="ui-grid-col-6">
+                            <p-dropdown [options]="clergyStatuses" formControlName="clergyStatus" placeholder></p-dropdown>
+                        </div>
+                        <div class="ui-grid-col-4">
+                            <p-message severity="error" text="Clergy Status is required" *ngIf="!personForm.controls['clergyStatus'].valid&&personForm.controls['clergyStatus'].dirty"></p-message>
+                        </div>
+                </div>
+                <div class="ui-grid-row">
+                        <div class="ui-grid-col-2">
+                            Assement start date:
+                        </div>
+                        <div class="ui-grid-col-6">
+                            <p-calendar [(ngModel)]="assesmentStart" showButtonBar="true" showIcon="true" [ngModelOptions]="{standalone: true}"></p-calendar>
+                        </div>
+                        <div class="ui-grid-col-2">
+                                Assesment end date:
+                        </div>
+                        <div class="ui-grid-col-6">
+                            <p-calendar [(ngModel)]="assesmentEnd" showButtonBar="true" showIcon="true" [ngModelOptions]="{standalone: true}"></p-calendar>
+                        </div>
+                </div>
                 <p-button type="submit" [disabled]="!personForm.valid" label="Submit"></p-button>
         </div>
     </form>
@@ -58,7 +105,7 @@
             </div>
         </div>
         <div id="result">
-            <query-results [filters]="filters" [queryResults]="queryResults"></query-results>
+            <query-results [filters]="availableFields" [queryResults]="queryResults"></query-results>
         </div>
 </div>
 

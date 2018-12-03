@@ -1,8 +1,8 @@
 import { Assesment } from './assesment.entity';
 import { ClergyStatus } from './clergystatus.enum';
 import { TheDb } from '../model/thedb'
-import { Observable, EMPTY, forkJoin, Observer} from'rxjs'
-import { map, flatMap, catchError } from 'rxjs/operators';
+import { Observable, EMPTY, forkJoin, Observer, zip, of} from'rxjs'
+import { map, flatMap, catchError, reduce } from 'rxjs/operators';
 
 export class Person {
 
@@ -85,6 +85,58 @@ export class Person {
                     }
                 })
             );
+    }
+
+    public static getAllByDistrictGenderClergyStatusAndDateRange(
+        district: string | null,
+        gender: string | null,
+        clergyStatus: ClergyStatus | null,
+        utcAssementStart: Date | null,
+        utcAssementEnd: Date | null
+    ): Observable<Person[]> {
+        let sql = `SELECT * FROM person WHERE`;
+        sql = sql + (district ? ` district = $district AND`: ``);
+        sql = sql + (gender ? ` gender = $gender AND`: ``);
+        sql = sql + (clergyStatus ? ` clergyStatus = $clergyStatus AND`: ``);
+        sql = (district !== null || gender !== null || clergyStatus !== null)? sql.slice(0, -3): sql.slice(0, -6) + ' ORDER BY name';
+        const values = {};
+        if (district) values['$district'] = district;
+        if (gender) values['$gender'] = gender;
+        if (clergyStatus) values['$clergyStatus'] = clergyStatus;    
+
+        return TheDb.selectAll(sql, values)
+            .pipe(
+                map((rows) => {
+                    const people: Person[] = [];
+                    for (const row of rows) {
+                        const person = new Person().fromRow(row);
+                        people.push(person);
+                    }
+                    return people;
+                })/*,
+                map((people: Person[]) => {
+                    let assesments$ = [];
+                    for (let person of people) {
+                        assesments$.push(Assesment.getAllByPerson(person))
+                    }
+                    return zip(assesments$).pipe(
+                        flatMap((assesments: Assesment[][]) => {
+                        for(let i = 0; i < assesments.length; i++) {
+                            people[i].assesments = assesments[i]
+                        }
+                        return people
+                        })
+                    ).subscribe(people => people)
+                }),
+                map((people: Person[]) => {
+                    return people.filter(p => p.assesments.filter((assesment: Assesment) => {
+                        let onOrAfterStart: boolean = utcAssementStart === null || assesment.date >= utcAssementStart;
+                        let onOrBeforEnd: boolean = utcAssementEnd === null || assesment.date <= utcAssementEnd
+                        return onOrAfterStart && onOrBeforEnd;
+                    }).length > 0);
+                })*/
+            );
+
     }
 
     public static getAll(): Observable<Person[]> {

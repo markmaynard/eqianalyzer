@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS `person` (
 	`name`	TEXT NOT NULL,
 	`dateOfBirth`	DATETIME,
 	`clergyStatus`	TEXT NOT NULL,
-	`district`	TEXT NOT NULL,
+	`district`	TEXT,
     `gender` TEXT NOT NULL,
 	PRIMARY KEY(`id`),
 	CONSTRAINT `unique_person` UNIQUE ('name', 'dateOfBirth')

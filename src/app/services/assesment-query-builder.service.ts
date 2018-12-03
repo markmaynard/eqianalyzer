@@ -63,11 +63,12 @@ export class AssesmentQueryBuilder {
         this.filters = this.filters.filter( (val: IFilter) => val.filterOption.fieldName !== filterOption.fieldName)
     }
 
-    getFilterQuery(): string {
-        let query: string = 'SELECT personId, '
+    getFilterQuery(startRange: Date | null = null, endRange: Date | null = null): string {
+        let query: string = 'SELECT personId, date, '
 
-        for(let filter of this.filters) {
-            query = query + filter.filterOption.fieldName + ', '
+        let unusedFilters = this.filters?this.POSSIBLE_FILTER_OPTIONS.filter(o => this.filters.filter(f => f.filterOption.fieldName === o.fieldName).length == 0):this.POSSIBLE_FILTER_OPTIONS
+        for(let filter of unusedFilters) {
+            query = query + filter.fieldName + ', '
         }
         query = query.slice(0, -2);
         query = query + ' FROM assesment';
@@ -81,6 +82,8 @@ export class AssesmentQueryBuilder {
                 query = query + vstring + ' AND '
             }
         }
+        query = startRange? query + `date >= '${startRange.getTime()}' AND `: query + '';
+        query = endRange? query + `date <= '${endRange.getTime()}' AND `: query + '';
         query = query.slice(0, -4);
 
         return query;

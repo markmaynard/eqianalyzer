@@ -1,5 +1,6 @@
 import { Component, OnInit, NgZone, Input, Output, EventEmitter, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
+import { FilterOption } from '../../services/assesment-query-builder.service'
 import * as math from 'mathjs';
 
 import { IFilter } from '../../services/assesment-query-builder.service';
@@ -12,7 +13,7 @@ import { isNumber } from 'util';
 export class QueryResultsComponent implements OnInit, OnChanges{
     
     @Input('filters')
-    public filters: IFilter[];
+    public filters: FilterOption[];
 
     @Input('queryResults')
     public queryResults: {}[];
@@ -43,17 +44,17 @@ export class QueryResultsComponent implements OnInit, OnChanges{
         let res = this.queryResults;
         this.zone.run( () => {
             for (let filter of this.filters) {
-                let arr = res.map(r => r[filter.filterOption.fieldName]);
+                let arr = res.map(r => r[filter.fieldName]);
                 this.calculations.push(
                     {
-                        filterName: filter.filterOption.fieldName,
+                        filterName: filter.fieldName,
                         stdev: math.std(arr),
                         average: math.mean(arr),
                         median: math.median(arr),
                         mode: math.mode(arr),
                     }
                 );
-                console.log(`${filter.filterOption.fieldName} ${math.std(arr)} ${math.median(arr)} ${math.mean(arr)} ${math.mode(arr)}`);
+                console.log(`${filter.fieldName} ${math.std(arr)} ${math.median(arr)} ${math.mean(arr)} ${math.mode(arr)}`);
             }
             this.cdRef.detectChanges();
         });
