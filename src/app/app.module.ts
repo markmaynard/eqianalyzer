@@ -19,6 +19,7 @@ import { NumberFilterComponent } from './components/number-filter/number-filter.
 import { QueryResultsComponent } from './components/query-results/query-results.component'
 import { SubjectSelectPromptComponent } from './components/subject-select-prompt/subject-select-prompt'
 import { AssesmentQueryBuilder } from './services/assesment-query-builder.service';
+import { AssesmentEntryFormComponent } from './components/assesment-entry-form/assesment-entry-form.component';
 
 @NgModule({
     imports: [
@@ -39,6 +40,7 @@ import { AssesmentQueryBuilder } from './services/assesment-query-builder.servic
     ],
     declarations: [
         AppComponent,
+        AssesmentEntryFormComponent,
         NumberFilterComponent,
         QueryResultsComponent,
         FilterBuilderComponent,
@@ -46,6 +48,7 @@ import { AssesmentQueryBuilder } from './services/assesment-query-builder.servic
     ],
     providers: [
         FilterBuilderComponent,
+        AssesmentEntryFormComponent,
         NumberFilterComponent,
         QueryResultsComponent,
         AssesmentQueryBuilder,

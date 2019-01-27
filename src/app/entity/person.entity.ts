@@ -64,6 +64,93 @@ export class Person {
             );
     }
 
+    public static getAllByNameAndDOB(name: string, dob: Date): Observable<Person[]> {
+        const sql = 'SELECT * FROM person WHERE name = $name AND dateOfBirth = $dateOfBirth';
+        const values = { 
+            $name: name,
+            $dateOfBirth: dob.toUTCString()
+        };
+
+        return TheDb.selectAll(sql, values)
+            .pipe(
+                map((rows) => {
+                    if (rows) {
+                        const people: Person[] = [];
+                    for (const row of rows) {
+                        const person = new Person().fromRow(row);
+                        people.push(person);
+                    }
+                    return people;
+                    } else {
+                        return []
+                    }
+                })
+            );
+    }
+
+    public static getByNameAndGender(name: string, gender: string): Observable<Person> {
+        const sql = 'SELECT * FROM person WHERE name = $name AND gender = $gender';
+        const values = { 
+            $name: name,
+            $gender: gender
+        };
+
+        return TheDb.selectOne(sql, values)
+            .pipe(
+                map((row) => {
+                    if (row) {
+                        return new Person().fromRow(row);
+                    } else {
+                        throw new Error('Expected to find 1 Person. Found 0.');
+                    }
+                })
+            );
+    }
+
+    public static getAllByNameAndGender(name: string, gender: string): Observable<Person[]> {
+        const sql = 'SELECT * FROM person WHERE name = $name AND gender = $gender';
+        const values = { 
+            $name: name,
+            $gender: gender
+        };
+
+        return TheDb.selectAll(sql, values)
+            .pipe(
+                map((rows) => {
+                    if (rows) {
+                        const people: Person[] = [];
+                    for (const row of rows) {
+                        const person = new Person().fromRow(row);
+                        people.push(person);
+                    }
+                    return people;
+                    } else {
+                        return []
+                    }
+                })
+            );
+    }
+
+    public static getByNameAndDOBAndGender(name: string, dob: Date, gender: string): Observable<Person> {
+        const sql = 'SELECT * FROM person WHERE name = $name AND dateOfBirth = $dateOfBirth AND gender = $gender';
+        const values = { 
+            $name: name,
+            $dateOfBirth: dob.toUTCString(),
+            $gender: gender
+        };
+
+        return TheDb.selectOne(sql, values)
+            .pipe(
+                map((row) => {
+                    if (row) {
+                        return new Person().fromRow(row);
+                    } else {
+                        throw new Error('Expected to find 1 Person. Found 0.');
+                    }
+                })
+            );
+    }
+
     public static getByName(name: string): Observable<Person[]> {
         const sql = 'SELECT * FROM person WHERE name = $name';
         const values = { 

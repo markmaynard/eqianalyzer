@@ -42,22 +42,24 @@ export class QueryResultsComponent implements OnInit, OnChanges{
     runCalculations() {
         console.log('runCalculations');
         let res = this.queryResults;
-        this.zone.run( () => {
-            for (let filter of this.filters) {
-                let arr = res.map(r => r[filter.fieldName]);
-                this.calculations.push(
-                    {
-                        filterName: filter.fieldName,
-                        stdev: math.std(arr),
-                        average: math.mean(arr),
-                        median: math.median(arr),
-                        mode: math.mode(arr),
-                    }
-                );
-                console.log(`${filter.fieldName} ${math.std(arr)} ${math.median(arr)} ${math.mean(arr)} ${math.mode(arr)}`);
-            }
-            this.cdRef.detectChanges();
-        });
+        if (res) {
+            this.zone.run( () => {
+                for (let filter of this.filters) {
+                    let arr = res.map(r => r[filter.fieldName]);
+                    this.calculations.push(
+                        {
+                            filterName: filter.fieldName,
+                            stdev: math.std(arr),
+                            average: math.mean(arr),
+                            median: math.median(arr),
+                            mode: math.mode(arr),
+                        }
+                    );
+                    console.log(`${filter.fieldName} ${math.std(arr)} ${math.median(arr)} ${math.mean(arr)} ${math.mode(arr)}`);
+                }
+                this.cdRef.detectChanges();
+            });
+        }
     }
 
 }

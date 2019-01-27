@@ -44,14 +44,14 @@ export class FilterBuilderComponent implements OnInit {
 
     districts: [{label: string, value: null|string}];
 
-    clergStatuses: [{label: string, value: null|string}] = [{label:'All', value: null}];
+    clergyStatuses: [{label: string, value: null|string}] = [{label:'All', value: null}];
 
     fieldSelectForm = new FormGroup({
         selectedField: new FormControl('', Validators.required)
     })
 
     constructor(private assesmentQueryBuilder: AssesmentQueryBuilder, private zone: NgZone) {
-        this.clergStatuses.push(...Object.keys(ClergyStatus).map(key => {
+        this.clergyStatuses.push(...Object.keys(ClergyStatus).map(key => {
             return {label: ''+ClergyStatus[key], value:key }
         }));
     }

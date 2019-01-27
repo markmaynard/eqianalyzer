@@ -42,9 +42,9 @@
                                         <tr *ngFor="let person of people">
                                             <td scope="row">{{person.id}}</td>
                                             <td scoep="row">{{person.name}}</td>
-                                            <td scope="row">{{person.Dob}}</td>
+                                            <td scope="row">{{person.dateOfBirth}}</td>
                                             <td>
-                                                <button class="btn btn-link" (click)="onMenu(person)">{{person.name}} {{person.Dob}}</button>
+                                                <button class="btn btn-link" (click)="onMenu(person)">{{person.name}} {{person.dateOfBirth}}</button>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -53,10 +53,13 @@
                         </div>
                     </div>
         </p-tabPanel>
+        <p-tabPanel header="Add Assement Manualy">
+            <assesment-entry-form></assesment-entry-form>
+        </p-tabPanel>
         <p-tabPanel header="Run Query">
-                <div class="container">
-                        <filter-builder></filter-builder>
-</div>
+            <div class="container">
+                <filter-builder></filter-builder>
+            </div>
         </p-tabPanel>
     </p-tabView>
 

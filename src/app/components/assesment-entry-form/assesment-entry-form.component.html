@@ -1,0 +1,72 @@
+<div>
+    Filter users:
+</div>
+<form [formGroup]="personForm" (ngSubmit)="onSubmit(personForm.value)">
+
+    <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid" style="margin: 10px 0px">
+            <div class="ui-grid-row">
+                <div class="ui-grid-col-2">
+                    Name:
+                </div>
+                <div class="ui-grid-col-6">
+                    <input pInputText type="text" formControlName="name" placeholder="Required"/>
+                </div>
+                <div class="ui-grid-col-4">
+                    <p-message severity="error" text="Name is required" *ngIf="!personForm.controls['name'].valid&&personForm.controls['name'].dirty"></p-message>
+                </div>
+            </div>
+            <div class="ui-grid-row">
+                    <div class="ui-grid-col-2">
+                        Date of Birth:
+                    </div>
+                    <div class="ui-grid-col-6">
+                        <p-calendar [(ngModel)]="dobValue" showButtonBar="true" showIcon="true" [ngModelOptions]="{standalone: true}"></p-calendar>
+                    </div>
+            </div>
+
+            <div class="ui-grid-row">
+                    <div class="ui-grid-col-2">
+                        Gender:
+                    </div>
+                    <div class="ui-grid-col-6">
+                        <p-dropdown [options]="genders" formControlName="gender" placeholder></p-dropdown>
+                    </div>
+                    <div class="ui-grid-col-4">
+                        <p-message severity="error" text="Gender is required" *ngIf="!personForm.controls['gender'].valid&&personForm.controls['gender'].dirty"></p-message>
+                    </div>
+            </div>
+            <p-button type="submit" [disabled]="!personForm.valid" label="Submit"></p-button>
+    </div>
+</form>
+<div *ngIf="activePerson">
+    <div>Active Subject: {{activePerson.name}}</div>
+    <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid">
+        <div class="ui-grid-row">
+            <div class="ui-grid-col-2">
+                Select Assement to modify:
+            </div>
+            <div class="ui-grid-col-8">
+                <form [formGroup]="assesmentsOptionsForm" (ngSubmit)="onSubmit(assesmentsOptionsForm.value)">
+                <p-dropdown [options]="assesmentsOptions" formControlName="assesmentsOptionsFormControl" placeholder></p-dropdown>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<p-dialog header="Select a subject" [(visible)]="showSubjectSelect">
+    <subject-select-prompt *ngIf="people.length > 0" [subjects]="people" (personSelected)="onPersonSelected($event)" ></subject-select-prompt>
+</p-dialog>
+<p-dialog header="Create a new subject" [(visible)]="showSubjectNoneFound">
+    No subject found, to create a new subject enter values for all fields and resubmit
+    <p-footer>
+            <p-button (onClick)="closeSubjectModal()" label="Cancel"></p-button>
+    </p-footer>
+</p-dialog>
+<p-dialog header="Create a new subject" [(visible)]="showSubjectCreate">
+        No subject found, to create a new subject enter values below for all fields and resubmit
+        <p-footer>
+                <p-button (onClick)="closeSubjectModal()" label="Cancel"></p-button>
+                <p-button (onClick)="addSubject()" label="Create New Subject"></p-button>
+        </p-footer>
+</p-dialog>

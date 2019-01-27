@@ -75,7 +75,7 @@
                 <p-button type="submit" [disabled]="!personForm.valid" label="Submit"></p-button>
         </div>
     </form>
-        <div *ngIf="people.length > 0">
+        <div *ngIf="people && people.length > 0">
             <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid" style="margin: 10px 0px">
                 <div *ngFor="let filter of filters">
                     <div class="ui-grid-row">
