@@ -94,6 +94,7 @@ export class AppComponent implements OnInit{
                 (reason) => {
                     // Handle errors
                     console.log('Error occurred while opening database: ', reason);
+                    this.createDb();
                 }
             );
     }
