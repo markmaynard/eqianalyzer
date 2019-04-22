@@ -36,6 +36,35 @@ export class Assesment {
     optimism: Number
     wellBeingIndicator: Number;
 
+    POSSIBLE_FIELDS: string[] = [
+        'inconsistencyIndex',
+        "positiveImpression",
+        "negativeImpression",
+        "item133Response",
+        "totalEmotionalIntelligence",
+        "selfPerceptionComposite",
+        "selfRegard",
+        "selfActualization",
+        "emotionalSelfAwareness",
+        "selfExpressionComposite",
+        "emotionalExpression",
+        "assertiveness",
+        "independence",
+        "interpersonalComposite",
+        "interpersonalRelationships",
+        "empathy",
+        "socialResponsibility",
+        "decisionMakingComposite",
+        "problemSolving",
+        "realityTesting",
+        "impulseControl",
+        "stressManagementComposite",
+        "flexibility",
+        "stressTolerance",
+        "optimism",
+        "wellBeingIndicator"
+        ];
+
     public static get(id: number): Observable<Assesment> {
         const sql = 'SELECT * FROM assesment WHERE id = $id';
         const values = { $id: id };
@@ -236,64 +265,36 @@ export class Assesment {
     public update(): Observable<void> {
         const sql = `
             UPDATE assesment
-                SET date = $date
-                SET personId = $personId
-                SET inconsistencyIndex = $inconsistencyIndex
-                SET positiveImpression = $positiveImpression
-                SET negativeImpression = $negativeImpression
-                SET item133Response = $item133Response
-                SET totalEmotionalIntelligence = $totalEmotionalIntelligence
-                SET selfPerceptionComposite = $selfPerceptionComposite
-                SET selfRegard = $selfRegard
-                SET selfActualization = $selfActualization
-                SET emotionalSelfAwareness = $emotionalSelfAwareness
-                SET selfExpressionComposite = $selfExpressionComposite
-                SET emotionalExpression = $emotionalExpression
-                SET assertiveness = $assertiveness
-                SET independence = $independence
-                SET interpersonalComposite = $interpersonalComposite
-                SET interpersonalRelationships = $interpersonalRelationships
-                SET empathy = $empathy
-                SET socialResponsibility = $socialResponsibility
-                SET decisionMakingComposite = $decisionMakingComposite
-                SET problemSolving = $problemSolving
-                SET realityTesting = $realityTesting
-                SET impulseControl = $impulseControl
-                SET stressManagementComposite = $stressManagementComposite
-                SET flexibility = $flexibility
-                SET stressTolerance = $stressTolerance
-                SET optimism = $optimism
-                SET wellBeingIndicator = $wellBeingIndicator)
-            VALUES(
-                $date,
-                $personId,
-                $inconsistencyIndex,
-                $positiveImpression,
-                $negativeImpression,
-                $item133Response,
-                $totalEmotionalIntelligence,
-                $selfPerceptionComposite,
-                $selfRegard,
-                $selfActualization,
-                $emotionalSelfAwareness,
-                $selfExpressionComposite,
-                $emotionalExpression,
-                $assertiveness,
-                $independence,
-                $interpersonalComposite,
-                $interpersonalRelationships,
-                $empathy,
-                $socialResponsibility,
-                $decisionMakingComposite,
-                $problemSolving,
-                $realityTesting,
-                $impulseControl,
-                $stressManagementComposite,
-                $flexibility,
-                $stressTolerance,
-                $optimism,
-                $wellBeingIndicator
-            )`;
+                SET date = $date,
+                personId = $personId,
+                inconsistencyIndex = $inconsistencyIndex,
+                positiveImpression = $positiveImpression,
+                negativeImpression = $negativeImpression,
+                item133Response = $item133Response,
+                totalEmotionalIntelligence = $totalEmotionalIntelligence,
+                selfPerceptionComposite = $selfPerceptionComposite,
+                selfRegard = $selfRegard,
+                selfActualization = $selfActualization,
+                emotionalSelfAwareness = $emotionalSelfAwareness,
+                selfExpressionComposite = $selfExpressionComposite,
+                emotionalExpression = $emotionalExpression,
+                assertiveness = $assertiveness,
+                independence = $independence,
+                interpersonalComposite = $interpersonalComposite,
+                interpersonalRelationships = $interpersonalRelationships,
+                empathy = $empathy,
+                socialResponsibility = $socialResponsibility,
+                decisionMakingComposite = $decisionMakingComposite,
+                problemSolving = $problemSolving,
+                realityTesting = $realityTesting,
+                impulseControl = $impulseControl,
+                stressManagementComposite = $stressManagementComposite,
+                flexibility = $flexibility,
+                stressTolerance = $stressTolerance,
+                optimism = $optimism,
+                wellBeingIndicator = $wellBeingIndicator
+            WHERE
+            id = $id`;
 
         const values = {
             $date: this.date,
@@ -323,7 +324,8 @@ export class Assesment {
             $flexibility: this.flexibility,
             $stressTolerance: this.stressTolerance,
             $optimism: this.optimism,
-            $wellBeingIndicator: this.wellBeingIndicator
+            $wellBeingIndicator: this.wellBeingIndicator,
+            $id: this.id
         };
 
         return TheDb.update(sql, values)

@@ -46,12 +46,32 @@
                 Select Assement to modify:
             </div>
             <div class="ui-grid-col-8">
-                <form [formGroup]="assesmentsOptionsForm" (ngSubmit)="onSubmit(assesmentsOptionsForm.value)">
+                <form [formGroup]="assesmentsOptionsForm" (ngSubmit)="onSubmitEditForm(assesmentsOptionsForm.value)">
                 <p-dropdown [options]="assesmentsOptions" formControlName="assesmentsOptionsFormControl" placeholder></p-dropdown>
+                <p-button type="submit" [disabled]="!assesmentsOptionsForm.valid" label="Submit"></p-button>
                 </form>
             </div>
         </div>
     </div>
+</div>
+<div *ngIf="activeAssesment">
+    <form (ngSubmit)="onSubmitAddAssesment(activeAssesmentFormGroup.value)" [formGroup]="activeAssesmentFormGroup">
+    <table class="table">
+        <tr>
+           <th>Field</th>
+           <th>Value</th> 
+        </tr>
+        <tr>
+            <td>Assesment date</td>
+            <td><p-calendar [(ngModel)]="activeAssesmentDate" showButtonBar="true" showIcon="true" [ngModelOptions]="{standalone: true}"></p-calendar></td>            
+        </tr>
+        <tr *ngFor="let field of activeAssesment.POSSIBLE_FIELDS">
+            <td>{{field}}</td>
+            <td><input pInputText type="number" [formControlName]="field" /></td>
+        </tr>
+    </table>
+    <p-button type="submit" [disabled]="!activeAssesmentFormGroup.valid" label="Submit"></p-button>
+    </form>
 </div>
 
 <p-dialog header="Select a subject" [(visible)]="showSubjectSelect">

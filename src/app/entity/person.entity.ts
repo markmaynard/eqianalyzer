@@ -174,6 +174,29 @@ export class Person {
             );
     }
 
+    public static getByNameLike(name: string): Observable<Person[]> {
+        const sql = 'SELECT * FROM person WHERE name like $name';
+        const values = { 
+            $name: '%'+name+'%'
+        };
+
+        return TheDb.selectAll(sql, values)
+            .pipe(
+                map((rows) => {
+                    if (rows) {
+                        const people: Person[] = [];
+                    for (const row of rows) {
+                        const person = new Person().fromRow(row);
+                        people.push(person);
+                    }
+                    return people;
+                    } else {
+                        throw new Error('Expected to find N Person(s). Found 0.');
+                    }
+                })
+            );
+    }
+
     public static getAllByDistrictGenderClergyStatusAndDateRange(
         district: string | null,
         gender: string | null,

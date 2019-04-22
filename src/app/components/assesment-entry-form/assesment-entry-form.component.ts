@@ -15,6 +15,9 @@ export class AssesmentEntryFormComponent implements OnInit {
 
     people: Person[] = [];
     activePerson: Person;
+    activeAssesment: Assesment;
+    activeAssesmentFormGroup: FormGroup;
+    activeAssesmentDate: Date = new Date();
     assesments: Assesment[] = [];
     personForm = new FormGroup({
         name: new FormControl(''),
@@ -62,7 +65,7 @@ export class AssesmentEntryFormComponent implements OnInit {
         let dob = (value.dob !== "")?this.dobValue:undefined;
         console.log(`Name: ${name} Gender: ${gender} DOB: ${dob}`)
         if (name && !dob && (!gender || gender === "")) {
-            Person.getByName(name).subscribe( (peeps: Person[]) => {
+            Person.getByNameLike(name).subscribe( (peeps: Person[]) => {
                 this.zone.run(() => {
                     this.people = peeps;
                     this.showSubjectSelect = peeps.length != 0;
@@ -105,6 +108,52 @@ export class AssesmentEntryFormComponent implements OnInit {
         }
     }
 
+    onSubmitEditForm(value:any) {
+        console.log(value);
+        let option:number = value.assesmentsOptionsFormControl || (this.assesmentsOptionsForm.get("assesmentsOptionsFormControl") || {value:null}).value || -1;
+
+        if (option !== -1) {
+            Assesment.get(option).subscribe((assesment: Assesment) => {
+                this.zone.run(() => {
+                    this.activeAssesment = assesment
+                    this.activeAssesmentDate = new Date(assesment.date);
+                    this.buildActiveAssesmentFromGroup()
+                });
+            })
+        } else {
+            this.activeAssesment = new Assesment();
+            this.activeAssesment.id = -1;
+            this.buildActiveAssesmentFromGroup()
+        }
+    }
+
+    buildActiveAssesmentFromGroup() {
+        let fields = {}
+        this.activeAssesment.POSSIBLE_FIELDS.forEach(f => {
+            fields[f] = new FormControl(this.activeAssesment[f] || 0.0)
+        });
+        this.activeAssesmentFormGroup = new FormGroup(fields)
+    }
+
+    onSubmitAddAssesment(value:any) {
+        console.log(value)
+        console.log(this.activeAssesmentDate)
+        this.activeAssesment.date = this.activeAssesmentDate
+        this.activeAssesment.POSSIBLE_FIELDS.forEach(f => {
+            this.activeAssesment[f]=value[f]
+        });
+        this.activeAssesment.personId = this.activePerson.id;
+        if(this.activeAssesment.id == -1) {
+            this.activeAssesment.insert().subscribe(r=>{
+                console.log(r);
+            });
+        } else {
+            this.activeAssesment.update().subscribe(r=>{
+                console.log(r);
+            });
+        }
+    }
+
     canAddNewSubject(value:any): boolean {
         let name = value.name || this.personForm.get("name");
         let gender = value.gender || (this.personForm.get("gender") || {value:null}).value;
@@ -121,7 +170,7 @@ export class AssesmentEntryFormComponent implements OnInit {
                 this.assesmentsOptions = [
                     ...this.assesments.map( (a, i) => {
                         let date = new Date(a.date);
-                        return {label:date.toDateString(), value:i}
+                        return {label:date.toDateString(), value:a.id}
                     }),
                     {label:"Create New Assement", value: -1}
                 ]
@@ -130,7 +179,11 @@ export class AssesmentEntryFormComponent implements OnInit {
         this.assesmentQueryBuilder.subjects = this.people;
     }
 
-    closeSubjectModal() {}
+    closeSubjectModal() {
+        this.showSubjectCreate = false;
+    }
 
-    addSubject() {}
+    addSubject() {
+        // todo: add new subject 
+    }
 }
