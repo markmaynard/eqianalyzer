@@ -55,7 +55,7 @@ export class QueryResultsComponent implements OnInit, OnChanges{
                             mode: math.mode(arr),
                         }
                     );
-                    console.log(`${filter.fieldName} ${math.std(arr)} ${math.median(arr)} ${math.mean(arr)} ${math.mode(arr)}`);
+                    console.log(`${filter.fieldName} ${math.std(arr,'uncorrected')} ${math.median(arr)} ${math.mean(arr)} ${math.mode(arr)}`);
                 }
                 this.cdRef.detectChanges();
             });

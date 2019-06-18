@@ -50,6 +50,10 @@ export class FilterBuilderComponent implements OnInit {
         selectedField: new FormControl('', Validators.required)
     })
 
+    disableWhenNameSet = false;
+
+    showQuery = false;
+
     constructor(private assesmentQueryBuilder: AssesmentQueryBuilder, private zone: NgZone) {
         this.clergyStatuses.push(...Object.keys(ClergyStatus).map(key => {
             return {label: ''+ClergyStatus[key], value:key }
@@ -99,6 +103,19 @@ export class FilterBuilderComponent implements OnInit {
             return {label: v.fieldName, value: v};
         });
     }
+    
+    updateName() {
+        let name = this.personForm.get("name");
+        if(name && name.value) {
+          this.disableWhenNameSet = true;
+        } else {
+          this.disableWhenNameSet = false;
+        }
+   }
+
+   showQueryDialog() {
+       this.showQuery = true;
+   }
 
     onSubmit(value: string) {
         console.log(value);
@@ -171,8 +188,10 @@ export class FilterBuilderComponent implements OnInit {
             this.assesmentStart? new Date(this.assesmentStart.getTime() - this.assesmentStart.getTimezoneOffset()*60000) : null,
             this.assesmentEnd? new Date(this.assesmentEnd.getTime() - this.assesmentEnd.getTimezoneOffset()*60000) : null
         );
-        // this.values = this.assesmentQueryBuilder.getFilterValues();
-        // console.log(this.values);
+    }
+
+    executeQuery() {
+        this.buildQuery();
         TheDb.selectAll(this.query, {}).subscribe(res => {
             this.zone.run(() => {
                 console.log("Results:");

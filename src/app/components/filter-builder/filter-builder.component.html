@@ -2,21 +2,22 @@
     <div>
         Filter users:
     </div>
-    <form [formGroup]="personForm" (ngSubmit)="onSubmit(personForm.value)">
+    <form [formGroup]="personForm" (ngSubmit)="onSubmit(personForm.value)" (keydown.enter)="$event.preventDefault()">
   
         <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid" style="margin: 10px 0px">
-                <div class="ui-grid-row">
+            <p-fieldset legend="Specific User">
+                <div class="ui-grid-row" style="padding-bottom: 10px">
                     <div class="ui-grid-col-2">
                         Name:
                     </div>
                     <div class="ui-grid-col-6">
-                        <input pInputText type="text" formControlName="name" placeholder="Required"/>
+                        <input pInputText type="text" formControlName="name" placeholder="Required" (change)="updateName()"/>
                     </div>
                     <div class="ui-grid-col-4">
                         <p-message severity="error" text="Name is required" *ngIf="!personForm.controls['name'].valid&&personForm.controls['name'].dirty"></p-message>
                     </div>
                 </div>
-                <div class="ui-grid-row">
+                <div class="ui-grid-row" style="padding-bottom: 10px">
                         <div class="ui-grid-col-2">
                             Date of Birth:
                         </div>
@@ -24,63 +25,69 @@
                             <p-calendar [(ngModel)]="dobValue" showButtonBar="true" showIcon="true" [ngModelOptions]="{standalone: true}"></p-calendar>
                         </div>
                 </div>
-
-                <div class="ui-grid-row">
+            </p-fieldset>
+            <p-fieldset legend="Generic Search">
+                <div class="ui-grid-row" style="padding-bottom: 10px">
                         <div class="ui-grid-col-2">
                             Gender:
                         </div>
                         <div class="ui-grid-col-6">
-                            <p-dropdown [options]="genders" formControlName="gender" placeholder></p-dropdown>
+                            <p-dropdown [options]="genders" formControlName="gender" placeholder [disabled]="disableWhenNameSet"></p-dropdown>
                         </div>
                         <div class="ui-grid-col-4">
                             <p-message severity="error" text="Gender is required" *ngIf="!personForm.controls['gender'].valid&&personForm.controls['gender'].dirty"></p-message>
                         </div>
                 </div>
-                <div class="ui-grid-row">
+                <div class="ui-grid-row" style="padding-bottom: 10px">
                         <div class="ui-grid-col-2">
                             District:
                         </div>
                         <div class="ui-grid-col-6">
-                            <p-dropdown [options]="districts" formControlName="district" placeholder></p-dropdown>
+                            <p-dropdown [options]="districts" formControlName="district" placeholder [disabled]="disableWhenNameSet"></p-dropdown>
                         </div>
                         <div class="ui-grid-col-4">
                             <p-message severity="error" text="district is required" *ngIf="!personForm.controls['district'].valid&&personForm.controls['district'].dirty"></p-message>
                         </div>
                 </div>
-                <div class="ui-grid-row">
+                <div class="ui-grid-row" style="padding-bottom: 10px">
                         <div class="ui-grid-col-2">
                             Clergy Status:
                         </div>
                         <div class="ui-grid-col-6">
-                            <p-dropdown [options]="clergyStatuses" formControlName="clergyStatus" placeholder></p-dropdown>
+                            <p-dropdown [options]="clergyStatuses" formControlName="clergyStatus" placeholder [disabled]="disableWhenNameSet"></p-dropdown>
                         </div>
                         <div class="ui-grid-col-4">
                             <p-message severity="error" text="Clergy Status is required" *ngIf="!personForm.controls['clergyStatus'].valid&&personForm.controls['clergyStatus'].dirty"></p-message>
                         </div>
                 </div>
-                <div class="ui-grid-row">
-                        <div class="ui-grid-col-2">
+                <div class="ui-grid-row" style="padding-bottom: 10px">
+                        <div class="ui-grid-col-3">
                             Assement start date:
                         </div>
-                        <div class="ui-grid-col-6">
-                            <p-calendar [(ngModel)]="assesmentStart" showButtonBar="true" showIcon="true" [ngModelOptions]="{standalone: true}"></p-calendar>
+                        <div class="ui-grid-col-4">
+                            <p-calendar [(ngModel)]="assesmentStart" showButtonBar="true" showIcon="true" [ngModelOptions]="{standalone: true}" [disabled]="disableWhenNameSet"></p-calendar>
                         </div>
-                        <div class="ui-grid-col-2">
+                        <div class="ui-grid-col-2"></div>
+                        <div class="ui-grid-col-3">
                                 Assesment end date:
                         </div>
-                        <div class="ui-grid-col-6">
-                            <p-calendar [(ngModel)]="assesmentEnd" showButtonBar="true" showIcon="true" [ngModelOptions]="{standalone: true}"></p-calendar>
+                        <div class="ui-grid-col-4">
+                            <p-calendar [(ngModel)]="assesmentEnd" showButtonBar="true" showIcon="true" [ngModelOptions]="{standalone: true}" [disabled]="disableWhenNameSet"></p-calendar>
                         </div>
                 </div>
+            </p-fieldset>
+            <div class="ui-grid-row" style="padding: 10px 0px 10px 0px">
                 <p-button type="submit" [disabled]="!personForm.valid" label="Submit"></p-button>
+            </div>
+            
         </div>
     </form>
         <div *ngIf="people && people.length > 0">
-            <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid" style="margin: 10px 0px">
+            <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid" style="padding: 10px 0px 10px 0px">
                 <div *ngFor="let filter of filters">
                     <div class="ui-grid-row">
                         <div class="ui-grid-col-12">
-                            <div [ngSwitch]="filter.filterOption.fieldType" style="margin: 10px 0px">
+                            <div [ngSwitch]="filter.filterOption.fieldType" style="padding: 10px 0px 10px 0px">
                                 <div *ngSwitchCase="fieldType.Number">
                                     <num-filter [numberFilter]="filter" (deleteFilter)="deleteFilter($event)"></num-filter>
                                 </div>
@@ -89,22 +96,28 @@
                         </div>
                     </div>
                 </div>
-                <div class="ui-grid-row">
+                <div class="ui-grid-row" style="padding: 10px 0px 10px 0px">
                     <form [formGroup]="fieldSelectForm" (ngSubmit)="addFilter(fieldSelectForm.value.selectedField)">
                         <p-dropdown [options]="availableFieldsSelectOptions" placeholder="Select a filter" formControlName="selectedField"></p-dropdown>
                         <p-button type="submit" styleClass="ui-button-success" [disabled]="availableFieldsSelectOptions.length == 0" label="Add Filter"></p-button>
                     </form>
                 </div>
-                <div class="ui-grid-row">
+                <div class="ui-grid-row" style="padding: 10px 0px 10px 0px">
                         <div class="ui-grid-col-6">Assesment Filters</div>
                         <div class="ui-grid-col-6">
                             <p-button (onClick)="buildQuery()" label="Build Query"></p-button>
                         </div>
-                    {{query}}
+                        <p-dialog header="Query" [(visible)]="showQuery">
+                            {{query}}
+                        </p-dialog>
+                        
+                        <button type="button" (click)="showQueryDialog()" pButton icon="pi pi-info-circle" label="Show Query" [disabled]="query==undefined"></button>    
+                    
                     </div>
             </div>
         </div>
-        <div id="result">
+        <p-button type="submit" [disabled]="query==undefined" label="Execute Query" (onClick)="executeQuery()"></p-button>
+        <div id="result" style="padding: 10px 0px 10px 0px">
             <query-results [filters]="availableFields" [queryResults]="queryResults"></query-results>
         </div>
 </div>
