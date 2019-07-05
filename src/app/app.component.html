@@ -1,5 +1,5 @@
 <p-menubar [model]="menuItems"></p-menubar>
-<p-tabView>
+<p-tabView (onChange)="onTabChange($event)">
         <p-tabPanel header="Load Data">
             <div class="ui-g">
                 <div class="ui-g-12">
@@ -30,7 +30,8 @@
                         </div>
                         <div class="row">
                             <div class="col">
-                                <table class="table">
+                                <p-progressSpinner *ngIf="loadingPeople"></p-progressSpinner>
+                                <table class="table" *ngIf="!loadingPeople">
                                     <thead>
                                         <tr>
                                             <th scope="col">#</th>

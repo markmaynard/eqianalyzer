@@ -36,6 +36,7 @@ export class AppComponent implements OnInit{
     };
     public showImportPopup: boolean = false;
     public settings = Settings;
+    public loadingPeople = false;
 
     constructor(
         private dbService : DbService,
@@ -88,7 +89,7 @@ export class AppComponent implements OnInit{
                         Settings.write();
                     }
                 }),
-                map(() => this.getPeople())
+                //map(() => this.getPeople())
             ).subscribe(
                 () =>  {console.log('DB opened')},
                 (reason) => {
@@ -129,7 +130,7 @@ export class AppComponent implements OnInit{
                 }),
                 map(() => {
                     console.log('Database opened, getting people');
-                    this.getPeople();
+                    //this.getPeople();
                 })
             ).subscribe(
                 () => { console.log('DB created')},
@@ -172,7 +173,7 @@ export class AppComponent implements OnInit{
                 }),
                 map(() => {
                     console.log('Database opened, getting people');
-                    this.getPeople();
+                    //this.getPeople();
                 })
             ).subscribe(
                 () => { console.log('DB created')},
@@ -182,7 +183,14 @@ export class AppComponent implements OnInit{
             );
     }
 
+    onTabChange(event: any) {
+        if (event && event.index === 1) {
+            this.getPeople()
+        }
+    }
+
     public getPeople() {
+        this.loadingPeople = true;
         Person.getAll()
             .subscribe((people) => {
                 this.zone.run(()=>{
@@ -192,6 +200,7 @@ export class AppComponent implements OnInit{
                 this.people = people.map( p => {
                     return Object.assign(p,{dobNum:Math.round(p.dateOfBirth.getTime() / 1000)});
                 });
+                this.loadingPeople = false;
                 });
             });
     }

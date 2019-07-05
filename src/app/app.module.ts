@@ -13,6 +13,7 @@ import { CalendarModule } from 'primeng/calendar';
 import { CardModule } from 'primeng/card';
 import { DialogModule } from 'primeng/dialog';
 import { FieldsetModule } from 'primeng/fieldset';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 import { AppComponent } from './app.component';
 import { FilterBuilderComponent } from './components/filter-builder/filter-builder.component';
@@ -38,7 +39,8 @@ import { AssesmentEntryFormComponent } from './components/assesment-entry-form/a
         RouterModule,
         FormsModule,
         ReactiveFormsModule,
-        FieldsetModule
+        FieldsetModule,
+        ProgressSpinnerModule
     ],
     declarations: [
         AppComponent,
