@@ -63,7 +63,7 @@
     "papaparse": "^4.6.0",
     "popper.js": "^1.14.3",
     "primeicons": "^1.0.0-beta.10",
-    "primeng": "^6.1.3",
+    "primeng": "^6.1.7",
     "reflect-metadata": "^0.1.12",
     "rxjs": "^6.2.2",
     "sqlite3": "^4.0.0",

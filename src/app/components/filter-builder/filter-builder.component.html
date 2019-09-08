@@ -116,8 +116,11 @@
                     </div>
             </div>
         </div>
-        <p-button type="submit" [disabled]="query==undefined" label="Execute Query" (onClick)="executeQuery()"></p-button>
-        <div id="result" style="padding: 10px 0px 10px 0px">
+        <div class="ui-grid-row" style="padding-bottom: 10px">
+            <div class="ui-grid-col-4"><p-button type="submit" [disabled]="!query" label="Execute Query" (onClick)="executeQuery()"></p-button></div>
+            <div class="ui-grid-col-4"><p-button type="button" [disabled]="!query || !queryResults" label="Clear Query Results" (onClick)="clearResults()"></p-button></div>
+        </div>
+        <div *ngIf="query && queryResults" id="result" style="padding: 10px 0px 10px 0px">
             <query-results [filters]="availableFields" [queryResults]="queryResults"></query-results>
         </div>
 </div>
@@ -125,3 +128,5 @@
 <p-dialog header="Select a subject" [(visible)]="showSubjectSelect">
         <subject-select-prompt [subjects]="people" (personSelected)="onPersonSelected($event)" ></subject-select-prompt>
 </p-dialog>
+
+<p-toast></p-toast>

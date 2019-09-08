@@ -42,7 +42,8 @@ export class QueryResultsComponent implements OnInit, OnChanges{
     runCalculations() {
         console.log('runCalculations');
         let res = this.queryResults;
-        if (res) {
+        this.calculations = [];
+        if (res && res.length>0) {
             this.zone.run( () => {
                 for (let filter of this.filters) {
                     let arr = res.map(r => r[filter.fieldName]);

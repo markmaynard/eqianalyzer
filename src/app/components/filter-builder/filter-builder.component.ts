@@ -54,7 +54,11 @@ export class FilterBuilderComponent implements OnInit {
 
     showQuery = false;
 
-    constructor(private assesmentQueryBuilder: AssesmentQueryBuilder, private zone: NgZone) {
+    constructor(
+        private assesmentQueryBuilder: AssesmentQueryBuilder,
+        private messageService: MessageService,
+        private zone: NgZone
+        ) {
         this.clergyStatuses.push(...Object.keys(ClergyStatus).map(key => {
             return {label: ''+ClergyStatus[key], value:key }
         }));
@@ -164,7 +168,11 @@ export class FilterBuilderComponent implements OnInit {
                     this.people = peeps;
                     this.showSubjectSelect=false;
                     this.assesmentQueryBuilder.subjects = this.people;
-                    this.buildQuery();
+                    if(this.people.length>0) {
+                        this.buildQuery();
+                    } else {
+                        this.messageService.add({severity:'warn', summary:'No cantidates found', detail:'Current filters return no results',sticky:true});
+                    }
                 })
             });
         }
@@ -205,5 +213,12 @@ export class FilterBuilderComponent implements OnInit {
                 }
             });
         });
+    }
+
+    clearResults() {
+        //this.query = '';
+        this.queryResults = [];
+        let filterOptions: FilterOption[] = this.assesmentQueryBuilder.getAvailableFilterOptions();
+        this.updateFilterLists();
     }
 }

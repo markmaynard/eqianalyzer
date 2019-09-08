@@ -4,10 +4,11 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
-import { MenubarModule } from 'primeng/primeng';
+import { MenubarModule, MessageService } from 'primeng/primeng';
 import { ButtonModule } from 'primeng/button';
 import { MessageModule, KeyFilterModule } from 'primeng/primeng';
 import { TabViewModule } from 'primeng/tabview';
+import { ToastModule } from 'primeng/toast';
 import { DropdownModule } from 'primeng/dropdown';
 import { CalendarModule } from 'primeng/calendar';
 import { CardModule } from 'primeng/card';
@@ -30,6 +31,7 @@ import { AssesmentEntryFormComponent } from './components/assesment-entry-form/a
         MenubarModule,
         MessageModule,
         TabViewModule,
+        ToastModule,
         KeyFilterModule,
         ButtonModule,
         DropdownModule,
@@ -56,7 +58,8 @@ import { AssesmentEntryFormComponent } from './components/assesment-entry-form/a
         NumberFilterComponent,
         QueryResultsComponent,
         AssesmentQueryBuilder,
-        SubjectSelectPromptComponent
+        SubjectSelectPromptComponent,
+        MessageService
     ],
     bootstrap: [
         AppComponent

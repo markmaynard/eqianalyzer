@@ -86,6 +86,7 @@ export class AssesmentQueryBuilder {
         query = endRange? query + `date <= '${endRange.getTime()}' AND `: query + '';
         query = query.slice(0, -4);
 
+        console.debug(query);
         return query;
     }
 
